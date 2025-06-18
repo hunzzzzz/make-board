@@ -28,9 +28,13 @@ public class Post {
 	private LocalDateTime createdAt;
 	
 	private LocalDateTime updatedAt;
+	
+	public Post(String title, String content) {
+		this.title = title;
+		this.content = content;
+	}
 
 	public Post(UUID userId, String title, String content, String author) {
-		super();
 		this.userId = userId;
 		this.title = title;
 		this.content = content;

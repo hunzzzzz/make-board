@@ -97,7 +97,6 @@
         list-style: none;
         padding: 0;
         margin: 0;
-        /* 기존 flex 속성 제거 - 한 줄에 하나씩 나오도록 */
       }
 
       /* 각 파일 항목 (회색 네모칸) */
@@ -109,7 +108,6 @@
         border-radius: 8px; /* 둥근 모서리 */
         display: flex;
         align-items: center;
-        /* 기존 flex-grow, max-width, min-width 제거 - 한 줄 전체 차지 */
         width: 100%; /* 부모 너비 전체 사용 */
         box-sizing: border-box; /* 패딩과 테두리를 너비에 포함 */
       }
@@ -152,6 +150,17 @@
         color: #777;
         margin-left: auto; /* 파일 이름과 파일 크기 정보를 양 끝으로 보내기 위해 */
         flex-shrink: 0; /* 크기 정보가 줄어들지 않도록 */
+      }
+
+      /* 첨부파일 없음 메시지 */
+      .no-files-message {
+          font-size: 1rem;
+          color: #888;
+          padding: 15px;
+          border: 1px dashed #e0e0e0;
+          border-radius: 8px;
+          background-color: #fcfcfc;
+          text-align: center;
       }
 
       /* 버튼 그룹 */
@@ -243,32 +252,37 @@
         </div>
 
         <div class="post-content">{{ post.content }}</div>
-        <div class="post-files" v-if="post.files && post.files.length > 0">
+        <div class="post-files">
           <h3>첨부파일</h3>
-          <ul class="file-list">
-            <li v-for="file in post.files" :key="file.fileId">
-              <img
-                :src="getFileIconSrc(file.fileType)"
-                :alt="file.originalFileName"
-                class="file-icon"
-              />
-              <a
-                :href="getFileDownloadUrl(file.fileId)"
-                :download="file.originalFileName"
-                >{{ file.originalFileName }}</a
-              >
-              <span class="file-size-info"
-                >({{ formatFileSize(file.fileSize) }})</span
-              >
-            </li>
-          </ul>
+          <template v-if="post.files && post.files.length > 0">
+            <ul class="file-list">
+              <li v-for="file in post.files" :key="file.fileId">
+                <img
+                  :src="getFileIconSrc(file.fileType)"
+                  :alt="file.originalFileName"
+                  class="file-icon"
+                />
+                <a
+                  :href="getFileDownloadUrl(file.fileId)"
+                  :download="file.originalFileName"
+                  >{{ file.originalFileName }}</a
+                >
+                <span class="file-size-info"
+                  >({{ formatFileSize(file.fileSize) }})</span
+                >
+              </li>
+            </ul>
+          </template>
+          <template v-else>
+            <p class="no-files-message">첨부파일이 없습니다.</p>
+          </template>
         </div>
 
         <div class="post-actions">
           <button
             type="button"
             class="action-button edit-button"
-            @click="editPost"
+            @click="editPost(post.postId)"
           >
             수정
           </button>
@@ -385,30 +399,28 @@
             }
           };
 
-          const editPost = () => {
-            // Vue.js 라우터를 사용하거나, window.location.href를 통해 수정 페이지로 이동
-            alert("수정 기능은 아직 구현되지 않았습니다.");
-            // window.location.href = `/posts/edit/${postId}`;
+          // ***** [ 수정 버튼을 클릭한 경우 ] *****
+          const editPost = (postId) => {
+            window.location.href = `/posts/${postId}/edit`;
           };
 
+          // ***** [ 삭제 버튼을 클릭한 경우 ] *****
           const deletePost = async () => {
             if (confirm("정말로 이 게시글을 삭제하시겠습니까?")) {
-              // 백엔드 삭제 API 호출 (예: DELETE /api/posts/{postId})
-              alert("삭제 기능은 아직 구현되지 않았습니다.");
-              // try {
-              //   const response = await fetch(`/api/posts/${postId}`, {
-              //     method: 'DELETE'
-              //   });
-              //   if (response.ok) {
-              //     alert('게시글이 삭제되었습니다.');
-              //     window.location.href = '/posts'; // 목록 페이지로 이동
-              //   } else {
-              //     alert('게시글 삭제에 실패했습니다.');
-              //   }
-              // } catch (error) {
-              //   console.error('게시글 삭제 중 오류 발생:', error);
-              //   alert('게시글 삭제 중 오류가 발생했습니다.');
-              // }
+              try {
+                const response = await fetch(`/api/posts/${postId}`, {
+                  method: "DELETE",
+                });
+
+                if (response.ok) {
+                  alert("게시글이 삭제되었습니다.");
+
+                  window.location.href = "/posts";
+                }
+              } catch (error) {
+                console.error("에러 발생:", error);
+                alert("게시글 삭제 중 에러가 발생했습니다.");
+              }
             }
           };
 

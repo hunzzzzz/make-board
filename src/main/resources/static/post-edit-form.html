@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>게시글 수정</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <style>
+      /* 기존 CSS 스타일은 변경 없이 유지됩니다. */
+      body {
+        font-family: "Inter", sans-serif;
+        background-color: #f3f4f6;
+        display: flex;
+        justify-content: center;
+        padding: 20px;
+        box-sizing: border-box;
+        min-height: 100vh;
+      }
+
+      .container {
+        background-color: #fff;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        width: 100%;
+        max-width: 800px;
+      }
+
+      h1 {
+        font-size: 2.5rem;
+        font-weight: bold;
+        text-align: center;
+        color: #333;
+        margin-bottom: 30px;
+      }
+
+      .message {
+        padding: 10px;
+        margin-bottom: 20px;
+        border-radius: 8px;
+        font-weight: 600;
+        text-align: center;
+      }
+
+      .message-success {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+      }
+
+      .message-error {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+      }
+
+      .form-group {
+        margin-bottom: 20px;
+      }
+
+      .form-group label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: #333;
+      }
+
+      .form-group input[type="text"],
+      .form-group textarea {
+        width: calc(100% - 20px);
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        font-size: 1rem;
+        box-sizing: border-box;
+      }
+
+      .form-group textarea {
+        min-height: 200px;
+        resize: vertical;
+      }
+
+      .form-group input[type="file"] {
+        width: 100%;
+        padding: 10px 0;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        font-size: 1rem;
+        box-sizing: border-box;
+        background-color: #f9f9f9;
+        cursor: pointer;
+      }
+
+      .error-message {
+        color: red;
+        font-size: 0.9em;
+        margin-top: 5px;
+        display: block;
+      }
+
+      .button-group {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-top: 30px;
+      }
+
+      .button-group button {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+      }
+
+      .button-group .submit-button {
+        background-color: #4f46e5;
+        color: #fff;
+      }
+
+      .button-group .submit-button:hover {
+        background-color: #4338ca;
+      }
+
+      .button-group .cancel-button {
+        background-color: #e0e0e0;
+        color: #333;
+      }
+
+      .button-group .cancel-button:hover {
+        background-color: #ccc;
+      }
+
+      /* 기존 첨부 파일 관련 CSS 추가 */
+      .existing-files-group {
+        margin-top: 20px;
+        margin-bottom: 20px;
+        padding: 15px;
+        border: 1px solid #eee;
+        border-radius: 8px;
+        background-color: #fcfcfc;
+      }
+
+      .existing-files-group h4 {
+        font-size: 1.1rem;
+        color: #555;
+        margin-bottom: 10px;
+      }
+
+      .existing-file-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+
+      .existing-file-list li {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 8px 0;
+        border-bottom: 1px dashed #eee;
+        color: #555;
+      }
+
+      .existing-file-list li:last-child {
+        border-bottom: none;
+      }
+
+      .existing-file-list .file-info {
+        display: flex;
+        align-items: center;
+        flex-grow: 1; /* 파일 이름이 길어질 경우 공간 확보 */
+        min-width: 0; /* flex 아이템에서 내용이 넘칠 때 줄 바꿈 방지 */
+      }
+
+      .existing-file-list .file-name {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        margin-right: 10px;
+        font-weight: 500;
+      }
+
+      .existing-file-list .file-size {
+        font-size: 0.9em;
+        color: #777;
+        flex-shrink: 0; /* 크기가 줄어들지 않도록 */
+      }
+
+      .existing-file-list .delete-file-button {
+        background: none;
+        border: none;
+        color: #dc2626;
+        cursor: pointer;
+        font-size: 0.9em;
+        margin-left: 15px;
+        padding: 5px 8px;
+        border-radius: 5px;
+        transition: background-color 0.2s ease;
+        flex-shrink: 0; /* 버튼이 줄어들지 않도록 */
+      }
+
+      .existing-file-list .delete-file-button:hover {
+        background-color: #fcebeb;
+      }
+
+      .existing-file-list .file-icon {
+        width: 18px; /* 아이콘 크기 약간 조정 */
+        height: 18px;
+        vertical-align: middle;
+        margin-right: 6px;
+      }
+
+      .no-existing-files {
+        color: #888;
+        font-size: 0.95em;
+        text-align: center;
+        padding: 10px 0;
+      }
+    </style>
+    <link rel="icon" href="/icons/favicon.ico" type="image/x-icon" />
+  </head>
+  <body>
+    <div id="app" class="container">
+      <h1>게시글 수정</h1>
+
+      <div
+        v-if="serverMessage"
+        :class="['message', 'message-' + serverMessageType]"
+      >
+        {{ serverMessage }}
+      </div>
+
+      <form @submit.prevent="submit">
+        <div class="form-group">
+          <label for="title">제목:</label>
+          <input type="text" id="title" name="title" required v-model="title" />
+          <div id="titleError" class="error-message" v-if="errors.title">
+            {{ errors.title }}
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="content">내용:</label>
+          <textarea
+            id="content"
+            name="content"
+            required
+            v-model="content"
+          ></textarea>
+          <div id="contentError" class="error-message" v-if="errors.content">
+            {{ errors.content }}
+          </div>
+        </div>
+
+        <div class="form-group existing-files-group">
+          <h4>현재 첨부 파일:</h4>
+          <ul class="existing-file-list" v-if="existingFiles.length > 0">
+            <li v-for="file in existingFiles" :key="file.fileId">
+              <div class="file-info">
+                <img
+                  :src="getFileIconSrc(file.fileType)"
+                  :alt="file.originalFileName"
+                  class="file-icon"
+                />
+                <span class="file-name">{{ file.originalFileName }}</span>
+                <span class="file-size"
+                  >({{ formatFileSize(file.fileSize) }})</span
+                >
+              </div>
+              <button
+                type="button"
+                class="delete-file-button"
+                @click="deleteExistingFile(file.fileId)"
+              >
+                삭제
+              </button>
+            </li>
+          </ul>
+          <p class="no-existing-files" v-else>첨부된 파일이 없습니다.</p>
+        </div>
+
+        <div class="form-group">
+          <label for="newFiles">새로운 첨부 파일 추가:</label>
+          <input
+            type="file"
+            id="newFiles"
+            name="files"
+            class="form-control"
+            multiple
+            @change="handleNewFileChange"
+          />
+        </div>
+
+        <div class="button-group">
+          <button
+            type="button"
+            class="cancel-button"
+            id="cancelButton"
+            @click="cancel"
+          >
+            취소
+          </button>
+          <button type="submit" class="submit-button">수정</button>
+        </div>
+      </form>
+    </div>
+
+    <script>
+      const { createApp, ref, onMounted } = Vue;
+
+      createApp({
+        setup() {
+          // ***** [ 변수 세팅 ] *****
+          const postId = window.location.pathname.split("/")[2]; // URI에서 postId 추출
+          const title = ref("");
+          const content = ref("");
+          const existingFiles = ref([]); // 기존 파일 목록을 저장할 배열
+          const newFiles = ref([]); // 새로 추가할 파일 목록을 저장할 배열
+          const filesToDelete = ref([]); // 삭제할 파일 ID 목록을 저장할 배열
+
+          const errors = ref({});
+          const serverMessage = ref("");
+          const serverMessageType = ref("");
+
+          // ***** [ 서버 메시지 초기화 ] *****
+          const clearMessages = () => {
+            serverMessage.value = "";
+            serverMessageType.value = "";
+            errors.value = {};
+          };
+
+          // ***** [ 클라이언트 측에서의 유효성 검사 ] *****
+          const validate = () => {
+            errors.value = {};
+            let isValid = true;
+
+            if (!title.value.trim()) {
+              errors.value.title = "제목은 필수 입력 항목입니다.";
+              isValid = false;
+            }
+            if (!content.value.trim()) {
+              errors.value.content = "내용은 필수 입력 항목입니다.";
+              isValid = false;
+            }
+
+            return isValid;
+          };
+
+          // ***** [ 기존 게시글 정보 조회 ] *****
+          const fetchPost = async () => {
+            try {
+              const response = await fetch(`/api/posts/${postId}/edit`);
+              const data = await response.json();
+
+              // 성공
+              if (response.ok) {
+                title.value = data.title;
+                content.value = data.content;
+                existingFiles.value = data.files || [];
+              }
+              // 기타 오류
+              else {
+                serverMessage.value =
+                  data.message || "게시글 정보를 불러오는 데 실패했습니다.";
+                serverMessageType.value = "error";
+              }
+            } catch (error) {
+              console.error("에러 발생:", error);
+
+              serverMessage.value =
+                "네트워크 오류 또는 서버 응답 처리 중 문제가 발생했습니다.";
+              serverMessageType.value = "error";
+            }
+          };
+
+          // ***** [ 마운트 시 데이터 로드 ] *****
+          onMounted(() => {
+            clearMessages();
+            fetchPost();
+          });
+
+          // ***** [ 새로운 첨부파일이 변경된 경우 ] *****
+          const handleNewFileChange = (event) => {
+            newFiles.value = Array.from(event.target.files);
+          };
+
+          // ***** [ 기존 첨부파일 삭제 버튼 클릭 시 ] *****
+          const deleteExistingFile = (fileId) => {
+            if (confirm("정말로 이 파일을 삭제하시겠습니까?")) {
+              // 삭제할 파일의 id를 추가
+              filesToDelete.value.push(fileId);
+
+              // 화면에서 해당 파일 제거
+              existingFiles.value = existingFiles.value.filter(
+                (file) => file.fileId !== fileId
+              );
+            }
+          };
+
+          // ***** [ '수정' 버튼을 클릭한 경우 ] *****
+          const submit = async () => {
+            // 서버 메시지 초기화
+            clearMessages();
+
+            // 클라이언트 측 유효성 검사에 실패한 경우
+            if (!validate()) {
+              serverMessage.value = "입력값을 다시 확인해주세요.";
+              serverMessageType.value = "error";
+              return;
+            }
+
+            // 폼 데이터 정의
+            const formData = new FormData();
+            formData.append("title", title.value);
+            formData.append("content", content.value);
+
+            filesToDelete.value.forEach((fileId) => {
+              formData.append("deletedFileIds", fileId);
+            });
+
+            newFiles.value.forEach((file) => {
+              formData.append("files", file);
+            });
+
+            // API 호출 (/api/posts/{postId})
+            try {
+              const response = await fetch(`/api/posts/${postId}`, {
+                method: "PUT",
+                body: formData,
+              });
+
+              const result = await response.json();
+
+              // 성공
+              if (response.ok) {
+                serverMessage.value = "게시글이 성공적으로 수정되었습니다.";
+                serverMessageType.value = "success";
+
+                setTimeout(() => {
+                  window.location.href = `/posts/${postId}`;
+                }, 1500);
+              }
+              // 유효성 검사 실패
+              else if (response.status === 400 && result.errors) {
+                errors.value = result.errors;
+                serverMessage.value = "입력값을 다시 확인해주세요.";
+                serverMessageType.value = "error";
+              }
+              // 기타 오류
+              else {
+                serverMessage.value =
+                  result.message || "게시글 수정 중 오류가 발생했습니다.";
+                serverMessageType.value = "error";
+              }
+            } catch (error) {
+              console.error("에러 발생:", error);
+              serverMessage.value =
+                "네트워크 오류 또는 서버 응답 처리 중 문제가 발생했습니다.";
+              serverMessageType.value = "error";
+            }
+          };
+
+          // ***** ['취소' 버튼을 클릭한 경우] *****
+          const cancel = () => {
+            if (
+              confirm(
+                "수정을 취소하시겠습니까? 작성 중인 내용은 저장되지 않습니다."
+              )
+            ) {
+              window.location.href = `/posts/${postId}`;
+            }
+          };
+
+          // ***** [ 파일 사이즈 포매팅 ] *****
+          const formatFileSize = (bytes) => {
+            if (bytes === 0) return "0 Bytes";
+
+            const k = 1024;
+            const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+
+            return (
+              parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i]
+            );
+          };
+
+          // ***** [ 파일 종류에 따른 아이콘 경로 반환 ] *****
+          const getFileIconSrc = (fileType) => {
+            if (fileType.startsWith("image/")) {
+              return "/icons/image.svg";
+            } else if (fileType === "application/pdf") {
+              return "/icons/pdf.svg";
+            } else if (
+              fileType.includes("wordprocess") ||
+              fileType.includes("officedocument.wordprocessingml")
+            ) {
+              return "/icons/word.svg";
+            } else if (
+              fileType.includes("excel") ||
+              fileType.includes("spreadsheet") ||
+              fileType.includes("officedocument.spreadsheetml")
+            ) {
+              return "/icons/excel.svg";
+            } else if (
+              fileType.includes("powerpoint") ||
+              fileType.includes("presentation") ||
+              fileType.includes("officedocument.presentationml")
+            ) {
+              return "/icons/ppt.svg";
+            } else if (
+              fileType === "application/zip" ||
+              fileType === "application/x-zip-compressed" ||
+              fileType === "application/vnd.rar"
+            ) {
+              return "/icons/zip.svg";
+            } else {
+              return "/icons/file.svg";
+            }
+          };
+
+          return {
+            title,
+            content,
+            existingFiles,
+            newFiles,
+            errors,
+            serverMessage,
+            serverMessageType,
+            handleNewFileChange,
+            deleteExistingFile,
+            submit,
+            cancel,
+            formatFileSize,
+            getFileIconSrc,
+          };
+        },
+      }).mount("#app");
+    </script>
+  </body>
+</html>

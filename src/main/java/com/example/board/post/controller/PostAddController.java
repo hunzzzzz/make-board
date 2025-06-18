@@ -5,7 +5,6 @@ import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -23,8 +22,7 @@ public class PostAddController {
 
 	@PostMapping("/api/posts")
 	ResponseEntity<Object> add(
-			@Valid @ModelAttribute PostAddRequest request, 
-			BindingResult bindingResult
+			@Valid @ModelAttribute PostAddRequest request
 	) {
 		// TODO: 추후 토큰에서 유저 정보를 추출하는 로직으로 구현
 		UUID userId = UUID.fromString("3a941437-08e4-4e95-9a1b-3d45027ac7fd");
