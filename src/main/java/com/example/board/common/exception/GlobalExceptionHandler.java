@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 import com.example.board.common.exception.file.FileStorageException;
+import com.example.board.common.exception.post.PostAccessException;
+import com.example.board.common.exception.post.PostNotFoundException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -32,21 +34,17 @@ public class GlobalExceptionHandler {
 		return ResponseEntity.internalServerError().body(error);
 	}
 	
-//	@ExceptionHandler(PostAccessException.class)
-//	String handlePostAccessException(Model model, PostAccessException e) {
-//		ErrorResponse error = ErrorResponse.of(e.message, "접근 권한이 없습니다", e.statusCode);
-//		
-//		model.addAttribute("error", error);
-//		
-//		return "error-page";
-//	}
-//	
-//	@ExceptionHandler(PostNotFoundException.class)
-//	String handlePostNotFoundException(Model model, PostNotFoundException e) {
-//		ErrorResponse error = ErrorResponse.of(e.message, "페이지를 찾을 수 없습니다", e.statusCode);
-//		
-//		model.addAttribute("error", error);
-//		
-//		return "error-page";
-//	}
+	@ExceptionHandler(PostAccessException.class)
+	ResponseEntity<ErrorResponse> handlePostAccessException(PostAccessException e) {
+		ErrorResponse error = ErrorResponse.of(e.message, "접근 권한이 없습니다", e.statusCode);
+		
+		return ResponseEntity.badRequest().body(error);
+	}
+	
+	@ExceptionHandler(PostNotFoundException.class)
+	ResponseEntity<ErrorResponse> handlePostNotFoundException(PostNotFoundException e) {
+		ErrorResponse error = ErrorResponse.of(e.message, "페이지를 찾을 수 없습니다", e.statusCode);
+		
+		return ResponseEntity.badRequest().body(error);
+	}
 }

@@ -20,8 +20,6 @@ public class PostAddService {
 
 	@Transactional
 	public void add(PostAddRequest request, UUID userId, String author) {
-		System.out.println(request.getFiles() == null);
-		
 		// 저장
 		Post post = request.toEntity(userId, author);
 		postMapper.add(post);

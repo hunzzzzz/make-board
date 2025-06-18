@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>게시글 조회</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <style>
+      /* 전체 페이지 기본 스타일 */
+      body {
+        font-family: "Inter", sans-serif;
+        background-color: #f3f4f6;
+        display: flex;
+        justify-content: center;
+        padding: 20px;
+        box-sizing: border-box;
+        min-height: 100vh;
+      }
+
+      /* 메인 컨테이너 */
+      .post-container {
+        background-color: #fff;
+        padding: 40px;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        width: 100%;
+        max-width: 900px; /* 게시글 상세 보기 컨테이너 너비 */
+        box-sizing: border-box;
+      }
+
+      /* 게시글 제목 */
+      .post-title-area {
+        border-bottom: 2px solid #eee;
+        padding-bottom: 20px;
+        margin-bottom: 20px;
+      }
+
+      .post-title {
+        font-size: 2.2rem;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 10px;
+        word-break: break-word; /* 제목이 길 경우 줄바꿈 */
+      }
+
+      /* 게시글 정보 (작성자, 날짜, 조회수 등) */
+      .post-info {
+        display: flex;
+        flex-wrap: wrap; /* 반응형을 위해 줄바꿈 허용 */
+        justify-content: space-between;
+        font-size: 0.95rem;
+        color: #777;
+        gap: 10px; /* 요소들 간의 간격 */
+      }
+
+      .post-info span {
+        margin-right: 15px;
+      }
+
+      .post-info .author {
+        font-weight: 500;
+        color: #555;
+      }
+
+      .post-info .separator::after {
+        content: "|";
+        margin-left: 15px;
+        color: #ccc;
+      }
+
+      /* 게시글 내용 */
+      .post-content {
+        line-height: 1.8;
+        font-size: 1.1rem;
+        color: #444;
+        min-height: 150px; /* 최소 높이 */
+        padding: 20px 0;
+        border-bottom: 1px solid #eee;
+        white-space: pre-wrap; /* 공백과 줄바꿈 유지 */
+        word-break: break-word; /* 긴 단어도 잘라 다음 줄로 넘어가도록 */
+      }
+
+      /* 첨부파일 섹션 */
+      .post-files {
+        margin-top: 20px;
+        padding-top: 15px;
+        border-top: 1px solid #eee;
+      }
+
+      .post-files h3 {
+        font-size: 1.2rem;
+        color: #555;
+        margin-bottom: 10px;
+      }
+
+      .file-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        /* 기존 flex 속성 제거 - 한 줄에 하나씩 나오도록 */
+      }
+
+      /* 각 파일 항목 (회색 네모칸) */
+      .file-list li {
+        margin-bottom: 10px; /* 각 파일 항목 아래에 간격 추가 */
+        padding: 10px 15px; /* 내부 여백 */
+        background-color: #f9f9f9; /* 연한 회색 배경 */
+        border: 1px solid #e0e0e0; /* 연한 테두리 */
+        border-radius: 8px; /* 둥근 모서리 */
+        display: flex;
+        align-items: center;
+        /* 기존 flex-grow, max-width, min-width 제거 - 한 줄 전체 차지 */
+        width: 100%; /* 부모 너비 전체 사용 */
+        box-sizing: border-box; /* 패딩과 테두리를 너비에 포함 */
+      }
+
+      .file-list li:last-child {
+        margin-bottom: 0; /* 마지막 항목 아래 간격 제거 */
+      }
+
+      .file-list li:hover {
+        background-color: #f0f0f0; /* 호버 시 배경색 변경 */
+        border-color: #c0c0c0; /* 호버 시 테두리색 변경 */
+      }
+
+      .file-list a {
+        color: #2563eb;
+        text-decoration: none;
+        font-weight: 500;
+        white-space: nowrap; /* 파일 이름이 한 줄에 표시되도록 */
+        overflow: hidden; /* 넘치는 부분 숨김 */
+        text-overflow: ellipsis; /* 넘치는 부분 ...으로 표시 */
+        margin-right: 5px; /* 파일 크기 정보와의 간격 */
+      }
+
+      .file-list a:hover {
+        text-decoration: underline;
+      }
+
+      /* 파일 아이콘 스타일 */
+      .file-list .file-icon {
+        width: 20px; /* 아이콘 너비 */
+        height: 20px; /* 아이콘 높이 */
+        vertical-align: middle; /* 텍스트와 세로 정렬 */
+        margin-right: 8px; /* 텍스트와의 간격 */
+        flex-shrink: 0; /* 아이콘이 줄어들지 않도록 */
+      }
+
+      /* 파일 크기 정보 */
+      .file-list .file-size-info {
+        font-size: 0.9em;
+        color: #777;
+        margin-left: auto; /* 파일 이름과 파일 크기 정보를 양 끝으로 보내기 위해 */
+        flex-shrink: 0; /* 크기 정보가 줄어들지 않도록 */
+      }
+
+      /* 버튼 그룹 */
+      .post-actions {
+        display: flex;
+        justify-content: flex-end; /* 오른쪽 정렬 */
+        gap: 10px;
+        margin-top: 30px;
+      }
+
+      .action-button {
+        padding: 10px 20px;
+        background-color: #4f46e5;
+        color: #fff;
+        font-weight: 600;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        text-decoration: none; /* a 태그 스타일 제거 */
+        display: inline-block; /* 패딩 적용을 위해 */
+        font-size: 1rem; /* 모든 버튼의 글씨 크기를 1rem으로 통일 */
+      }
+
+      .action-button:hover {
+        background-color: #4338ca;
+      }
+
+      /* 삭제, 수정 버튼 색상 */
+      .delete-button {
+        background-color: #dc2626; /* 빨간색 계열 */
+      }
+
+      .delete-button:hover {
+        background-color: #b91c1c;
+      }
+
+      .edit-button {
+        background-color: #f59e0b; /* 주황색 계열 */
+      }
+
+      .edit-button:hover {
+        background-color: #d97706;
+      }
+
+      .list-button {
+        background-color: #6b7280; /* 회색 계열 */
+      }
+
+      .list-button:hover {
+        background-color: #4b5563;
+      }
+
+      /* 게시글이 삭제된 경우 */
+      .deleted-message {
+        text-align: center;
+        font-size: 1.5rem;
+        color: #888;
+        padding: 50px 0;
+        margin-bottom: 20px;
+        border: 1px dashed #ccc;
+        border-radius: 8px;
+        background-color: #f9f9f9;
+      }
+    </style>
+    <link rel="icon" href="/icons/favicon.ico" type="image/x-icon" />
+  </head>
+  <body>
+    <div id="app" class="post-container">
+      <template v-if="post">
+        <div class="post-title-area">
+          <h1 class="post-title">{{ post.title }}</h1>
+          <div class="post-info">
+            <div>
+              <span class="author">{{ post.author }}</span>
+              <span class="separator"></span>
+              <span>작성일: {{ post.formattedCreatedAt }}</span>
+              <template v-if="post.isUpdated">
+                <span class="separator"></span>
+                <span>(수정일: {{ post.formattedUpdatedAt }})</span>
+              </template>
+            </div>
+            <div>
+              <span>조회수: {{ post.viewCount }}</span>
+              <span class="separator"></span>
+              <span>추천수: {{ post.likeCount }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="post-content">{{ post.content }}</div>
+        <div class="post-files" v-if="post.files && post.files.length > 0">
+          <h3>첨부파일</h3>
+          <ul class="file-list">
+            <li v-for="file in post.files" :key="file.fileId">
+              <img
+                :src="getFileIconSrc(file.fileType)"
+                :alt="file.originalFileName"
+                class="file-icon"
+              />
+              <a
+                :href="getFileDownloadUrl(file.fileId)"
+                :download="file.originalFileName"
+                >{{ file.originalFileName }}</a
+              >
+              <span class="file-size-info"
+                >({{ formatFileSize(file.fileSize) }})</span
+              >
+            </li>
+          </ul>
+        </div>
+
+        <div class="post-actions">
+          <button
+            type="button"
+            class="action-button edit-button"
+            @click="editPost"
+          >
+            수정
+          </button>
+          <button
+            type="button"
+            class="action-button delete-button"
+            @click="deletePost"
+          >
+            삭제
+          </button>
+          <a href="/posts" class="action-button list-button">목록으로</a>
+        </div>
+      </template>
+
+      <template v-else>
+        <div class="deleted-message">
+          <p>게시글을 찾을 수 없거나 삭제된 게시글입니다.</p>
+          <a href="/posts" class="action-button list-button"
+            >목록으로 돌아가기</a
+          >
+        </div>
+      </template>
+    </div>
+
+    <script>
+      const { createApp, ref, onMounted } = Vue;
+
+      createApp({
+        setup() {
+          // ***** [ 변수 세팅 ] *****
+          const post = ref(null);
+          const postId = window.location.pathname.split("/").pop(); // URI에서 postId 추출
+
+          // ***** [ 게시글 불러오기 ] *****
+          const fetchPost = async () => {
+            // API 호출 (/api/posts/{postId})
+            try {
+              const response = await fetch(`/api/posts/${postId}`);
+              const data = await response.json();
+
+              // 성공
+              if (response.ok) {
+                post.value = data;
+              } else if (response.status === 400) {
+                console.log(data);
+                alert("ㅋㅋ");
+
+                // window.location.href = "/error";
+                // TODO: 데이터도 같이 보내줘야함.
+              } else if (response.status === 404) {
+                // 404 Not Found는 게시글 없음으로 처리
+                post.value = null; // 게시글을 찾을 수 없음
+              }
+            } catch (error) {
+              console.error("에러 발생:", error);
+              post.value = null;
+            }
+          };
+
+          // ***** [ 마운트 시 게시글 조회 ] *****
+          onMounted(() => {
+            fetchPost();
+          });
+
+          // ***** [ 첨부파일 다운로드 URL 생성 ] *****
+          const getFileDownloadUrl = (fileId) => {
+            return `/api/files/${fileId}`;
+          };
+
+          // ***** [ 파일 사이즈 포매팅 ] *****
+          const formatFileSize = (bytes) => {
+            if (bytes === 0) return "0 Bytes";
+
+            const k = 1024;
+            const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+
+            return (
+              parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i]
+            );
+          };
+
+          // ***** [ 파일 종류에 따른 아이콘 경로 반환 ] *****
+          const getFileIconSrc = (fileType) => {
+            if (fileType.startsWith("image/")) {
+              return "/icons/image.svg";
+            } else if (fileType === "application/pdf") {
+              return "/icons/pdf.svg";
+            } else if (
+              fileType.includes("wordprocess") ||
+              fileType.includes("officedocument.wordprocessingml")
+            ) {
+              return "/icons/word.svg";
+            } else if (
+              fileType.includes("excel") ||
+              fileType.includes("spreadsheet") ||
+              fileType.includes("officedocument.spreadsheetml")
+            ) {
+              return "/icons/excel.svg";
+            } else if (
+              fileType.includes("powerpoint") ||
+              fileType.includes("presentation") ||
+              fileType.includes("officedocument.presentationml")
+            ) {
+              return "/icons/ppt.svg";
+            } else if (
+              fileType === "application/zip" ||
+              fileType === "application/x-zip-compressed" ||
+              fileType === "application/vnd.rar"
+            ) {
+              return "/icons/zip.svg";
+            } else {
+              return "/icons/file.svg";
+            }
+          };
+
+          const editPost = () => {
+            // Vue.js 라우터를 사용하거나, window.location.href를 통해 수정 페이지로 이동
+            alert("수정 기능은 아직 구현되지 않았습니다.");
+            // window.location.href = `/posts/edit/${postId}`;
+          };
+
+          const deletePost = async () => {
+            if (confirm("정말로 이 게시글을 삭제하시겠습니까?")) {
+              // 백엔드 삭제 API 호출 (예: DELETE /api/posts/{postId})
+              alert("삭제 기능은 아직 구현되지 않았습니다.");
+              // try {
+              //   const response = await fetch(`/api/posts/${postId}`, {
+              //     method: 'DELETE'
+              //   });
+              //   if (response.ok) {
+              //     alert('게시글이 삭제되었습니다.');
+              //     window.location.href = '/posts'; // 목록 페이지로 이동
+              //   } else {
+              //     alert('게시글 삭제에 실패했습니다.');
+              //   }
+              // } catch (error) {
+              //   console.error('게시글 삭제 중 오류 발생:', error);
+              //   alert('게시글 삭제 중 오류가 발생했습니다.');
+              // }
+            }
+          };
+
+          return {
+            post,
+            getFileDownloadUrl,
+            formatFileSize,
+            getFileIconSrc,
+            editPost,
+            deletePost,
+          };
+        },
+      }).mount("#app");
+    </script>
+  </body>
+</html>

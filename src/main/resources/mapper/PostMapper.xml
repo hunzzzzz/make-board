@@ -12,7 +12,29 @@
 		<result property="likeCount" column="like_count" />
 		<result property="createdAt" column="created_at" />
 	</resultMap>
-
+	
+	<resultMap id="fileResponseMap" type="com.example.board.file.dto.response.FileResponse">
+	    <id property="fileId" column="file_id" />
+		<result property="originalFileName" column="original_file_name"/>
+		<result property="fileSize" column="file_size"/>
+		<result property="fileType" column="file_type"/>
+	</resultMap>
+	
+	<resultMap id="postDetailResponse" type="com.example.board.post.dto.response.PostDetailResponse">
+		<id property="postId" column="id" />
+		<result property="userId" column="user_id"/>
+		<result property="status" column="status" />
+		<result property="title" column="title" />
+		<result property="content" column="content" />
+		<result property="author" column="author" />
+		<result property="viewCount" column="view_count" />
+		<result property="likeCount" column="like_count" />
+		<result property="createdAt" column="created_at" />
+		<result property="updatedAt" column="updated_at"/>
+		<result property="isUpdated" column="is_updated" /> 
+		<collection property="files" javaType="java.util.ArrayList" resultMap="fileResponseMap" />
+	</resultMap>
+	
 	<!-- 게시글 전체 목록 조회 -->
 	<select id="getAll" resultMap="postResponse">
 		SELECT * FROM (
@@ -56,6 +78,41 @@
 				</if>
 			</where>
 	</select>
+	
+	<!-- 게시글 단건 조회 -->
+	<select id="get" resultMap="postDetailResponse">
+		SELECT 
+			p.id, 
+			p.status, 
+			p.title, 
+			p.content, 
+			p.author, 
+			p.view_count,
+			p.like_count,
+			p.created_at, 
+			p.updated_at,
+			CASE 
+				WHEN p.created_at != p.updated_at THEN 1
+				ELSE 0
+			END AS is_updated,
+			f.id AS file_id,
+			f.original_file_name,
+			f.file_size,
+			f.file_type
+		FROM 
+			t_board_post p
+		LEFT JOIN
+			t_board_file f ON p.id = f.post_id
+		WHERE 
+			p.id=#{postId}
+	</select>
+	
+	<update id="incrementViewCount">
+		UPDATE t_board_post
+		SET
+			view_count = view_count + 1
+		WHERE id=#{postId}
+	</update>
 	
 	<!-- 게시글 등록 -->
 	<insert id="add">

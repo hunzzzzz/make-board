@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.apache.ibatis.annotations.Mapper;
 
+import com.example.board.post.dto.response.PostDetailResponse;
 import com.example.board.post.dto.response.PostResponse;
 import com.example.board.post.entity.Post;
 import com.example.board.post.entity.SortCondition;
@@ -17,6 +18,13 @@ public interface PostMapper {
 	List<PostResponse> getAll(int pageSize, int offset, String keyword, SortCondition sort);
 	
 	int countAllPosts(String keyword);
+	
+	/*
+	 * 게시글 단건 조회에 필요한 메서드
+	 */
+	PostDetailResponse get(long postId);
+	
+	void incrementViewCount(long postId);
 	
 	/*
 	 * 게시글 등록에 필요한 메서드

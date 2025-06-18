@@ -2,10 +2,22 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.example.board.file.mapper.FileMapper">
+	<resultMap id="fileDownloadResponse" type="com.example.board.file.dto.response.FileDownloadResponse">
+		<id property="fileId" column="id"/>
+		<result property="originalFileName" column="original_file_name"/>
+		<result property="savedFileName" column="saved_file_name"/>
+		<result property="fileType" column="file_type"/>
+	</resultMap>
 	
 	<insert id="save">
 		INSERT INTO t_board_file(id, post_id, original_file_name, saved_file_name, file_path, file_size, file_type)
 		VALUES(#{fileId}, #{postId}, #{originalFileName}, #{savedFileName}, #{path}, #{fileSize}, #{fileType})
 	</insert>
+	
+	<select id="get" resultMap="fileDownloadResponse">
+		SELECT id, original_file_name, saved_file_name, file_type 
+		FROM t_board_file
+		WHERE id = #{fileId, jdbcType=VARCHAR}
+	</select>
 	
 </mapper>
