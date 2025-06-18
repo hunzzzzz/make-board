@@ -8,7 +8,10 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class WebConfig implements WebMvcConfigurer {
 	@Override
 	public void addViewControllers(ViewControllerRegistry registry) {
-		registry.addViewController("/posts").setViewName("posts.html");
-		registry.addViewController("/").setViewName("posts.html");
+		// 게시글 목록
+		registry.addViewController("/posts").setViewName("forward:posts.html");
+		registry.addViewController("/").setViewName("forward:posts.html");
+		// 게시글 등록 폼
+		registry.addViewController("/posts/add").setViewName("forward:/post-form.html");
 	}
 }

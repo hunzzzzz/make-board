@@ -56,5 +56,14 @@
 				</if>
 			</where>
 	</select>
+	
+	<!-- 게시글 등록 -->
+	<insert id="add">
+		<selectKey keyProperty="postId" resultType="long" order="AFTER">
+			SELECT seq_t_board_post.CURRVAL FROM DUAL
+		</selectKey>
+		INSERT INTO t_board_post(user_id, title, content, author)
+		VALUES(#{userId, jdbcType=VARCHAR}, #{title}, #{content}, #{author})
+	</insert>
 
 </mapper>

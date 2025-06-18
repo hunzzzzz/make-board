@@ -6,7 +6,6 @@
     <title>게시글 목록</title>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <style>
-      /* JSP 파일에서 제공해주신 CSS를 여기에 그대로 붙여넣습니다. */
       body {
         font-family: "Inter", sans-serif;
         background-color: #f3f4f6;
@@ -24,6 +23,7 @@
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         width: 100%;
         max-width: 1200px; /* 게시글 목록 컨테이너 너비를 1200px로 유지 */
+        overflow-x: auto; /* 내용이 max-width를 넘어가면 가로 스크롤 생성 */
       }
 
       h1 {
@@ -89,6 +89,9 @@
         width: 100%;
         border-collapse: collapse;
         margin-top: 20px;
+        /* display: block; overflow-x: auto;는 .container에 이미 적용되었으므로 제거하거나,
+           테이블 자체에 스크롤을 원한다면 유지할 수 있습니다.
+           여기서는 .container의 overflow-x를 따르도록 제거합니다. */
       }
 
       .post-table th,
@@ -100,14 +103,14 @@
 
       /* 가운데 정렬이 필요한 컬럼 */
       .post-table th:nth-child(1), /* 번호 */
-        .post-table th:nth-child(3), /* 작성자 */
-        .post-table th:nth-child(6) {
+      .post-table th:nth-child(3), /* 작성자 */
+      .post-table th:nth-child(6) {
         /* 작성일 */
         text-align: center;
       }
       .post-table td:nth-child(1), /* 번호 */
-        .post-table td:nth-child(3), /* 작성자 */
-        .post-table td:nth-child(6) {
+      .post-table td:nth-child(3), /* 작성자 */
+      .post-table td:nth-child(6) {
         /* 작성일 */
         text-align: center;
       }
@@ -116,7 +119,13 @@
         background-color: #f8f8f8;
         font-weight: bold;
         color: #555;
-        white-space: nowrap; /* 제목 줄바꿈 방지 */
+        white-space: nowrap; /* 헤더 텍스트는 줄바꿈 방지 */
+      }
+
+      /* 제목 셀에는 줄바꿈 허용 */
+      .post-table td:nth-child(2) {
+        white-space: normal; /* 제목 셀은 내용이 길어지면 줄바꿈되도록 */
+        word-break: break-word; /* 긴 단어도 잘라 다음 줄로 넘어가도록 */
       }
 
       .post-table tr:nth-child(even) {
@@ -198,13 +207,10 @@
     <link rel="icon" href="/icons/favicon.ico" type="image/x-icon" />
   </head>
   <body>
-    <div class="container">
-      <!-- 제목 -->
+    <div id="app" class="container">
       <h1>게시글 목록</h1>
 
-      <!-- 게시판 상단 -->
       <div class="header-actions">
-        <!-- 검색창 -->
         <div class="search-form">
           <input
             type="text"
@@ -216,7 +222,6 @@
           <button type="button" @click="fetchPosts(1)">검색</button>
         </div>
 
-        <!-- 정렬 박스 -->
         <select
           id="sortSelect"
           class="sort-select"
@@ -229,11 +234,9 @@
           <option value="MOST_LIKED">추천순</option>
         </select>
 
-        <!-- '새 글 작성' 버튼 -->
-        <a href="/posts/new" class="action-button">새 글 작성</a>
+        <a href="/posts/add" class="action-button">새 글 작성</a>
       </div>
 
-      <!-- 게시판 -->
       <table class="post-table">
         <thead>
           <tr>
@@ -246,16 +249,13 @@
           </tr>
         </thead>
         <tbody>
-          <!-- 게시글 요소 출력 -->
           <template v-if="posts && posts.length > 0">
             <tr v-for="post in posts" :key="post.postId">
               <td>{{ post.postId }}</td>
               <td>
-                <!-- 삭제된 게시글의 제목 -->
                 <template v-if="post.status === 'DELETED'">
                   <span class="deleted-post-title"> {{ post.title }} </span>
                 </template>
-                <!-- 일반 게시글 제목 (클릭 시, 게시글 단건 조회)-->
                 <template v-else>
                   <a
                     href="#"
@@ -271,7 +271,6 @@
               <td>{{ post.formattedCreatedAt }}</td>
             </tr>
           </template>
-          <!-- 게시글이 존재하지 않는 경우 -->
           <template v-else>
             <tr>
               <td colspan="6" style="text-align: center; padding: 30px">
@@ -282,16 +281,19 @@
         </tbody>
       </table>
 
-      <!-- 페이지네이션 -->
       <div class="pagination" v-if="pageInfo">
-        <!-- '이전' 버튼 -->
         <span v-if="pageInfo.currentPage <= 1" class="disabled">이전</span>
-        <a v-else href="#" @click.prevent="fetchPosts(pageInfo.currentPage - 1)"
+        <a
+          v-else
+          href="#"
+          @click.prevent="fetchPosts(pageInfo.currentPage - 1)"
           >이전</a
         >
 
         <template v-for="pageNumber in getPageNumbers()">
-          <span v-if="pageNumber === pageInfo.currentPage" class="current-page"
+          <span
+            v-if="pageNumber === pageInfo.currentPage"
+            class="current-page"
             >{{ pageNumber }}</span
           >
           <a v-else href="#" @click.prevent="fetchPosts(pageNumber)"
@@ -299,13 +301,15 @@
           >
         </template>
 
-        <!-- 다음 버튼 -->
         <span
           v-if="pageInfo.currentPage >= pageInfo.totalPages"
           class="disabled"
           >다음</span
         >
-        <a v-else href="#" @click.prevent="fetchPosts(pageInfo.currentPage + 1)"
+        <a
+          v-else
+          href="#"
+          @click.prevent="fetchPosts(pageInfo.currentPage + 1)"
           >다음</a
         >
       </div>
@@ -322,7 +326,7 @@
           const keyword = ref("");
           const sort = ref("LATEST");
 
-          // ***** API 호출 (/posts) *****
+          // ***** API 호출 (/api/posts) *****
           const fetchPosts = async (page = 1) => {
             currentPage.value = page;
 
@@ -375,7 +379,7 @@
             return numbers;
           };
 
-          // ***** API 호출 (/posts/${postId})
+          // ***** API 호출 (/api/posts/${postId})
           const goToPostDetail = (postId) => {
             alert("hi");
             // window.location.href = `/posts/${postId}`;

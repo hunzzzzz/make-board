@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>새 게시글 작성</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <style>
+      /* 기존 CSS 스타일은 변경 없이 유지됩니다. */
+      body {
+        font-family: "Inter", sans-serif;
+        background-color: #f3f4f6;
+        display: flex;
+        justify-content: center;
+        padding: 20px;
+        box-sizing: border-box;
+        min-height: 100vh;
+      }
+
+      .container {
+        background-color: #fff;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        width: 100%;
+        max-width: 800px;
+      }
+
+      h1 {
+        font-size: 2.5rem;
+        font-weight: bold;
+        text-align: center;
+        color: #333;
+        margin-bottom: 30px;
+      }
+
+      .message {
+        padding: 10px;
+        margin-bottom: 20px;
+        border-radius: 8px;
+        font-weight: 600;
+        text-align: center;
+      }
+
+      .message-success {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+      }
+
+      .message-error {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+      }
+
+      .form-group {
+        margin-bottom: 20px;
+      }
+
+      .form-group label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: #333;
+      }
+
+      .form-group input[type="text"],
+      .form-group textarea {
+        width: calc(100% - 20px);
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        font-size: 1rem;
+        box-sizing: border-box;
+      }
+
+      .form-group textarea {
+        min-height: 200px;
+        resize: vertical;
+      }
+
+      .form-group input[type="file"] {
+        width: 100%;
+        padding: 10px 0;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        font-size: 1rem;
+        box-sizing: border-box;
+        background-color: #f9f9f9;
+        cursor: pointer;
+      }
+
+      .error-message {
+        color: red;
+        font-size: 0.9em;
+        margin-top: 5px;
+        display: block;
+      }
+
+      .button-group {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-top: 30px;
+      }
+
+      .button-group button {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+      }
+
+      .button-group .submit-button {
+        background-color: #4f46e5;
+        color: #fff;
+      }
+
+      .button-group .submit-button:hover {
+        background-color: #4338ca;
+      }
+
+      .button-group .cancel-button {
+        background-color: #e0e0e0;
+        color: #333;
+      }
+
+      .button-group .cancel-button:hover {
+        background-color: #ccc;
+      }
+
+      /* 기존 첨부 파일 관련 CSS는 이 모드에서는 사용되지 않지만, 나중을 위해 남겨둘 수 있습니다. */
+      .existing-files-group {
+        display: none;
+      } /* 현재 모드에서 숨김 */
+    </style>
+    <link rel="icon" href="/icons/favicon.ico" type="image/x-icon" />
+  </head>
+  <body>
+    <div id="app" class="container">
+      <h1>새 게시글 작성</h1>
+
+      <div
+        v-if="serverMessage"
+        :class="['message', 'message-' + serverMessageType]"
+      >
+        {{ serverMessage }}
+      </div>
+
+      <form @submit.prevent="submit">
+        <div class="form-group">
+          <label for="title">제목:</label>
+          <input type="text" id="title" name="title" required v-model="title" />
+          <div id="titleError" class="error-message" v-if="errors.title">
+            {{ errors.title }}
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="content">내용:</label>
+          <textarea
+            id="content"
+            name="content"
+            required
+            v-model="content"
+          ></textarea>
+          <div id="contentError" class="error-message" v-if="errors.content">
+            {{ errors.content }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="newFiles">새로운 첨부 파일:</label>
+          <input
+            type="file"
+            id="newFiles"
+            name="files"
+            class="form-control"
+            multiple
+            @change="handleNewFileChange"
+          />
+        </div>
+
+        <div class="button-group">
+          <button
+            type="button"
+            class="cancel-button"
+            id="cancelButton"
+            @click="cancel"
+          >
+            취소
+          </button>
+          <button type="submit" class="submit-button">등록</button>
+        </div>
+      </form>
+    </div>
+
+    <script>
+      const { createApp, ref, onMounted } = Vue;
+
+      createApp({
+        setup() {
+          const title = ref("");
+          const content = ref("");
+          const selectedFiles = ref([]);
+
+          const errors = ref({});
+          const serverMessage = ref("");
+          const serverMessageType = ref("");
+
+          // ***** [함수] 서버 메시지 초기화 *****
+          const clearMessages = () => {
+            serverMessage.value = "";
+            serverMessageType.value = "";
+            errors.value = {};
+          };
+
+          // ***** [함수] 클라이언트 측에서의 유효성 검사 *****
+          const validate = () => {
+            errors.value = {};
+            var isValid = true;
+
+            if (!title.value.trim()) {
+              errors.value.title = "제목은 필수 입력 항목입니다.";
+              isValid = false;
+            }
+            if (!content.value.trim()) {
+              errors.value.content = "내용은 필수 입력 항목입니다.";
+              isValid = false;
+            }
+
+            return isValid;
+          };
+
+          // ***** [기능] 마운트 시 서버 메시지 초기화 *****
+          onMounted(() => {
+            clearMessages();
+          });
+
+          // ***** [기능] 파일이 변경된 경우 *****
+          const handleNewFileChange = (event) => {
+            selectedFiles.value = Array.from(event.target.files);
+            // 파일 선택 시 파일 관련 에러 메시지 초기화
+            if (errors.value.files) delete errors.value.files;
+          };
+
+          // ***** [기능] 폼 제출 *****
+          const submit = async () => {
+            // 서버 메시지 초기화
+            clearMessages();
+
+            // 클라이언트 측 유효성 검사에 실패한 경우
+            if (!validate()) {
+              serverMessage.value = "입력값을 다시 확인해주세요.";
+              serverMessageType.value = "error";
+
+              return;
+            }
+
+            // 폼 데이터 정의
+            const formData = new FormData();
+
+            formData.append("title", title.value);
+            formData.append("content", content.value);
+            selectedFiles.value.forEach((file) => {
+              formData.append("files", file);
+            });
+
+            // API 호출 (/api/posts)
+            try {
+              const response = await fetch(`/api/posts`, {
+                method: "POST",
+                body: formData
+              });
+
+              const result = await response.json();
+
+              // 성공
+              if (response.ok) {
+                serverMessage.value = "게시글이 성공적으로 등록되었습니다.";
+                serverMessageType.value = "success";
+
+                setTimeout(() => {
+                  window.location.href = "/posts";
+                }, 1500);
+              }
+              // 유효성 검사 실패
+              else if (response.status === 400 && result.errors) {
+                errors.value = result.errors;
+                serverMessage.value = "입력값을 다시 확인해주세요.";
+                serverMessageType.value = "error";
+              }
+              // 기타 오류
+              else {
+                serverMessage.value =
+                  result.message || "게시글 등록 중 오류가 발생했습니다.";
+                serverMessageType.value = "error";
+              }
+            } catch (error) {
+              console.error("Fetch error:", error);
+              serverMessage.value =
+                "네트워크 오류 또는 서버 응답 처리 중 문제가 발생했습니다.";
+              serverMessageType.value = "error";
+            }
+          };
+
+          // ***** [기능] 취소 버튼 *****
+          const cancel = () => {
+            if (
+              confirm(
+                "작성을 취소하시겠습니까? 작성 중인 내용은 저장되지 않습니다."
+              )
+            ) {
+              window.location.href = "/posts";
+            }
+          };
+
+          return {
+            title,
+            content,
+            selectedFiles,
+            errors,
+            serverMessage,
+            serverMessageType,
+            handleNewFileChange,
+            submit,
+            cancel,
+          };
+        },
+      }).mount("#app");
+    </script>
+  </body>
+</html>

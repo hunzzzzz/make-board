@@ -29,4 +29,12 @@ public class Post {
 	
 	private LocalDateTime updatedAt;
 
+	public Post(UUID userId, String title, String content, String author) {
+		super();
+		this.userId = userId;
+		this.title = title;
+		this.content = content;
+		this.author = author;
+	}
+	
 }
