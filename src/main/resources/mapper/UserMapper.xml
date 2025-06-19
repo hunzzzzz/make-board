@@ -9,6 +9,7 @@
 		<result property="role" column="role" />
 		<result property="email" column="email" />
 		<result property="password" column="password" />
+		<result property="name" column="name"/>
 	</resultMap>
 
 	<!-- 회원가입 -->
@@ -25,7 +26,7 @@
 
 	<!-- 로그인 -->
 	<select id="getLoginInfo" resultMap="userLoginResponse">
-		SELECT id, role, email, password
+		SELECT id, role, email, password, name
 		FROM t_board_user
 		WHERE email=#{email}
 	</select>

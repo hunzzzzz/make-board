@@ -7,6 +7,9 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import com.example.board.common.auth.JwtAuthenticationFilter;
 
 import lombok.RequiredArgsConstructor;
 
@@ -14,8 +17,7 @@ import lombok.RequiredArgsConstructor;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-//	private final JwtAuthenticationFilter jwtAuthenticationFilter;
-//	private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+	private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
 	@Bean
 	BCryptPasswordEncoder bCryptPasswordEncoder() {
@@ -31,12 +33,16 @@ public class SecurityConfig {
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(authorize -> authorize
                 .requestMatchers(
-            		// 일반 경로
+              		// 매핑 경로
                     "/",
                     "/signup",
                     "/login",
                     "/posts",
-                    "/api/**",
+                    "/posts/add",
+                    // API 호출
+                    "/api/signup/**",
+                    "/api/login/**",
+                    "/api/posts",
                     // 매핑 HTML 파일
                     "/signup.html",
                     "/login.html",
@@ -54,11 +60,8 @@ public class SecurityConfig {
                 ).permitAll()
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
-            );
-//            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-//        	.exceptionHandling(exception -> 
-//        		exception.authenticationEntryPoint(jwtAuthenticationEntryPoint)
-//            );
+            )
+            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

@@ -89,29 +89,23 @@
         width: 100%;
         border-collapse: collapse;
         margin-top: 20px;
-        /* display: block; overflow-x: auto;는 .container에 이미 적용되었으므로 제거하거나,
-           테이블 자체에 스크롤을 원한다면 유지할 수 있습니다.
-           여기서는 .container의 overflow-x를 따르도록 제거합니다. */
       }
 
       .post-table th,
       .post-table td {
         border: 1px solid #e0e0e0;
         padding: 12px 15px;
-        text-align: left; /* 기본 왼쪽 정렬 */
+        text-align: left;
       }
 
-      /* 가운데 정렬이 필요한 컬럼 */
-      .post-table th:nth-child(1), /* 번호 */
-      .post-table th:nth-child(3), /* 작성자 */
+      .post-table th:nth-child(1),
+      .post-table th:nth-child(3),
       .post-table th:nth-child(6) {
-        /* 작성일 */
         text-align: center;
       }
-      .post-table td:nth-child(1), /* 번호 */
-      .post-table td:nth-child(3), /* 작성자 */
+      .post-table td:nth-child(1),
+      .post-table td:nth-child(3),
       .post-table td:nth-child(6) {
-        /* 작성일 */
         text-align: center;
       }
 
@@ -119,13 +113,12 @@
         background-color: #f8f8f8;
         font-weight: bold;
         color: #555;
-        white-space: nowrap; /* 헤더 텍스트는 줄바꿈 방지 */
+        white-space: nowrap;
       }
 
-      /* 제목 셀에는 줄바꿈 허용 */
       .post-table td:nth-child(2) {
-        white-space: normal; /* 제목 셀은 내용이 길어지면 줄바꿈되도록 */
-        word-break: break-word; /* 긴 단어도 잘라 다음 줄로 넘어가도록 */
+        white-space: normal;
+        word-break: break-word;
       }
 
       .post-table tr:nth-child(even) {
@@ -136,26 +129,23 @@
         background-color: #f0f0f0;
       }
 
-      /* 기존 링크 스타일 유지, hover 시 밑줄 제거 */
       .post-table td a.post-title-link {
-        /* 제목 링크에만 적용될 클래스 추가 */
         color: #2563eb;
-        text-decoration: none; /* 기본 밑줄 제거 */
+        text-decoration: none;
         font-weight: 500;
         transition: color 0.2s ease;
-        cursor: pointer; /* 클릭 가능한 요소임을 명시 */
+        cursor: pointer;
       }
 
       .post-table td a.post-title-link:hover {
         color: #1d4ed8;
-        text-decoration: none; /* hover 시에도 밑줄 제거 */
+        text-decoration: none;
       }
 
-      /* 삭제된 게시글 제목 스타일 */
       .post-table .deleted-post-title {
-        text-decoration: line-through; /* 취소선 */
-        color: #999; /* 회색 텍스트 */
-        cursor: default; /* 마우스 커서 변경 */
+        text-decoration: line-through;
+        color: #999;
+        cursor: default;
       }
 
       .post-table .view-count,
@@ -236,7 +226,7 @@
           <option value="MOST_LIKED">추천순</option>
         </select>
 
-        <a href="/posts/add" class="action-button">새 글 작성</a>
+        <a href="#" class="action-button" @click.prevent="redirectToWrite">새 글 작성</a>
       </div>
 
       <table class="post-table">
@@ -397,6 +387,20 @@
             window.location.href = `/posts/${postId}`;
           };
 
+          // ***** [ 새 글 작성 버튼 클릭 시 인증 확인 ] *****
+          const redirectToWrite = () => {
+            const accessToken = localStorage.getItem('accessToken');
+
+            if (accessToken) {
+              window.location.href = '/posts/add';
+            } else {
+              alert('새로운 게시글을 작성하려면 로그인해야 합니다.');
+
+              window.location.href = '/login';
+            }
+          };
+
+
           return {
             posts,
             pageInfo,
@@ -405,6 +409,7 @@
             fetchPosts,
             getPageNumbers,
             goToPostDetail,
+            redirectToWrite, // 새로 추가된 메서드 노출
           };
         },
       }).mount("#app");

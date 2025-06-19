@@ -41,7 +41,7 @@ public class JwtProvider {
 	 */
 	private String createToken(UserLoginResponse user, Long expirationMillis) {
 		// Claims 생성
-		Claims claims = Jwts.claims().add("roles", List.of(user.getRole())).add("email", user.getEmail()).build();
+		Claims claims = Jwts.claims().add("roles", List.of(user.getRole())).add("name", user.getName()).build();
 
 		// JWT 생성
 		String jwt = Jwts.builder()

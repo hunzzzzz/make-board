@@ -137,11 +137,9 @@
       } /* 현재 모드에서 숨김 */
     </style>
     <link rel="icon" href="/icons/favicon.ico" type="image/x-icon" />
-  </head>
+    </head>
   <body>
     <div id="app" class="container">
-      <navbar-component></navbar-component>
-
       <h1>새 게시글 작성</h1>
 
       <div
@@ -200,10 +198,15 @@
 
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script type="module">
-        import Navbar from "/components/Navbar.js"; // 경로 확인
+      // Navbar.js 임포트 삭제
+      // import Navbar from "/components/Navbar.js";
 
-        const { createApp, ref, onMounted } = Vue;
+      const { createApp, ref, onMounted } = Vue;
       createApp({
+        components: {
+          // 'navbar-component': Navbar // 컴포넌트 등록 부분 삭제
+        },
+
         setup() {
           // ***** [ 변수 세팅 ] *****
           const title = ref("");
@@ -213,6 +216,8 @@
           const errors = ref({});
           const serverMessage = ref("");
           const serverMessageType = ref("");
+
+          const accessToken = localStorage.getItem("accessToken"); // 기존대로 유지
 
           // ***** [ 서버 메시지 초기화 ] *****
           const clearMessages = () => {
@@ -274,7 +279,10 @@
 
             // API 호출 (/api/posts)
             try {
-              const response = await fetch(`/api/posts`, {
+              const response = await fetch(`/api/posts/add`, {
+                headers: {
+                  "Authorization": accessToken
+                },
                 method: "POST",
                 body: formData,
               });
@@ -295,6 +303,13 @@
                 errors.value = result.errors;
                 serverMessage.value = "입력값을 다시 확인해주세요.";
                 serverMessageType.value = "error";
+              }
+              // 인증 실패
+              else if (response.status === 401 && (result.message === 'Access Token이 만료되었습니다. 다시 로그인해주세요.') ) {
+                alert("인증이 만료되었습니다. 다시 로그인해주세요.");
+
+                localStorage.removeItem("accessToken");
+                window.location.href = "/login";
               }
               // 기타 오류
               else {

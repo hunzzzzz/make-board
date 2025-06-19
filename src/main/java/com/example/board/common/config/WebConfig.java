@@ -1,11 +1,21 @@
 package com.example.board.common.config;
 
+import java.util.List;
+
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import com.example.board.common.auth.UserPrincipalArgumentResolver;
+
+import lombok.RequiredArgsConstructor;
+
 @Configuration
+@RequiredArgsConstructor
 public class WebConfig implements WebMvcConfigurer {
+	private final UserPrincipalArgumentResolver userPrincipalArgumentResolver;
+	
 	@Override
 	public void addViewControllers(ViewControllerRegistry registry) {
 		// 회원가입
@@ -23,5 +33,10 @@ public class WebConfig implements WebMvcConfigurer {
 		registry.addViewController("/posts/{postId:\\d+}").setViewName("forward:/post.html");
 		// 에러 페이지
 		registry.addViewController("/error-page").setViewName("error-page.html");
+	}
+	
+	@Override
+	public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
+		resolvers.add(userPrincipalArgumentResolver);
 	}
 }
