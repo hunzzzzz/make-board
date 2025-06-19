@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>회원가입</title>
+    <link rel="icon" href="/icons/favicon.ico" type="image/x-icon" />
+    <style>
+      /* 전체 페이지 스타일 */
+      body {
+        font-family: "Inter", sans-serif;
+        background-color: #f3f4f6;
+        display: flex; /* body를 flex 컨테이너로 유지 */
+        flex-direction: column; /* 자식 요소들을 수직으로 정렬 */
+        align-items: center; /* 수평 중앙 정렬 (컨테이너들이 가운데 오도록) */
+        justify-content: center; /* 수직 중앙 정렬 (회원가입 폼을 중앙에 배치) */
+        min-height: 100vh;
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      /* 회원가입 폼 컨테이너 */
+      .container {
+        background-color: #fff;
+        padding: 40px;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        width: 100%;
+        max-width: 750px; /* 이미지에 맞게 적절한 max-width 설정 */
+        box-sizing: border-box; /* 패딩이 너비에 포함되도록 */
+      }
+
+      h2 {
+        font-size: 2.75rem;
+        font-weight: bold;
+        text-align: center;
+        color: #333;
+        margin-bottom: 30px;
+      }
+
+      .form-group {
+        margin-bottom: 20px;
+      }
+
+      label {
+        display: block;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #555;
+        margin-bottom: 8px;
+      }
+
+      .input-group {
+        display: flex;
+        gap: 8px;
+        width: 100%;
+        box-sizing: border-box;
+      }
+
+      input[type="email"],
+      input[type="password"],
+      input[type="text"] {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        font-size: 1rem;
+        box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
+        box-sizing: border-box;
+      }
+
+      .input-group input[type="email"] {
+        flex-grow: 1;
+        width: auto; /* flex-grow 때문에 width는 auto로 설정 */
+      }
+
+      .input-group button {
+        flex-shrink: 0; /* 버튼이 줄어들지 않도록 */
+        width: 100px; /* 버튼 고정 너비 */
+        padding: 12px 10px;
+      }
+
+      input:focus {
+        outline: none;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+      }
+
+      button {
+        background-color: #2563eb;
+        color: #fff;
+        font-weight: 600;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      button:hover {
+        background-color: #1d4ed8;
+      }
+
+      button[type="submit"] {
+        width: 100%;
+        background-color: #4f46e5;
+        padding: 12px 18px;
+      }
+
+      button[type="submit"]:hover {
+        background-color: #4338ca;
+      }
+
+      .error-message {
+        color: #ef4444;
+        font-size: 0.875rem;
+        margin-top: 5px;
+        /* v-if로 제어되므로 display: none은 불필요 */
+      }
+
+      .link-text {
+        margin-top: 30px;
+        text-align: center;
+        font-size: 0.875rem;
+        color: #666;
+      }
+
+      .link-text a {
+        color: #4f46e5;
+        text-decoration: none;
+        font-weight: 500;
+      }
+
+      .link-text a:hover {
+        text-decoration: underline;
+      }
+
+      .message {
+        padding: 10px;
+        margin-bottom: 15px;
+        border-radius: 8px;
+        text-align: center;
+        font-weight: bold;
+        /* v-if로 제어되므로 display: none은 불필요 */
+      }
+
+      .message.success {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+      }
+
+      .message.error {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <div class="container">
+        <h2>회원가입</h2>
+
+        <div v-if="serverMessage" :class="['message', serverMessageType]">
+          {{ serverMessage }}
+        </div>
+
+        <form id="signupForm" @submit.prevent="submitForm">
+          <div class="form-group">
+            <label for="email">이메일</label>
+            <div class="input-group">
+              <input
+                type="email"
+                id="email"
+                name="email"
+                v-model="email"
+                required
+                placeholder="이메일을 입력해주세요."
+              />
+              <button type="button" @click="checkEmail">중복확인</button>
+            </div>
+            <p v-if="errors.email" class="error-message">
+              {{ errors.email }}
+            </p>
+          </div>
+
+          <div class="form-group">
+            <label for="password">비밀번호</label>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              v-model="password"
+              required
+              placeholder="8~16자, 대문자, 소문자, 특수문자 포함"
+            />
+            <p v-if="errors.password" class="error-message">
+              {{ errors.password }}
+            </p>
+          </div>
+
+          <div class="form-group">
+            <label for="name">이름</label>
+            <input
+              type="text"
+              id="name"
+              name="name"
+              v-model="name"
+              required
+              placeholder="이름을 입력해주세요. (최대 10자)"
+              maxlength="10"
+            />
+            <p v-if="errors.name" class="error-message">
+              {{ errors.name }}
+            </p>
+          </div>
+
+          <button type="submit">회원가입</button>
+        </form>
+
+        <p class="link-text">
+          이미 계정이 있으신가요?<a href="/login">로그인</a>
+        </p>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script>
+      const { createApp, ref, onMounted } = Vue;
+
+      createApp({
+        setup() {
+          const email = ref("");
+          const password = ref("");
+          const name = ref("");
+          const didEmailCheck = ref(false); // 이메일 중복 확인 여부
+
+          const errors = ref({}); // 필드별 에러 메시지 객체
+          const serverMessage = ref(""); // 서버 응답 메시지
+          const serverMessageType = ref(""); // 서버 응답 메시지 타입 (success/error)
+
+          // ***** [ 메시지 및 에러 초기화 함수 ] *****
+          const clearMessages = () => {
+            serverMessage.value = "";
+            serverMessageType.value = "";
+            errors.value = {}; // 모든 필드 에러 초기화
+          };
+
+          // ***** [ 클라이언트 측 유효성 검사 함수: 최소한의 빈 값 체크 ] *****
+          const validateForm = () => {
+            clearMessages(); // 검사 전에 모든 메시지 초기화
+            let isValid = true;
+            const newErrors = {};
+
+            if (!email.value.trim()) {
+              newErrors.email = "이메일은 필수 입력 항목입니다.";
+              isValid = false;
+            }
+
+            if (!password.value.trim()) {
+              newErrors.password = "비밀번호는 필수 입력 항목입니다.";
+              isValid = false;
+            }
+
+            if (!name.value.trim()) {
+              newErrors.name = "이름은 필수 입력 항목입니다.";
+              isValid = false;
+            }
+
+            errors.value = newErrors; // 새 에러 객체로 업데이트
+            return isValid;
+          };
+
+          // ***** [ 마운트 시 초기화 ] *****
+          onMounted(() => {
+            clearMessages();
+          });
+
+          // ***** [ 이메일 '중복확인' 버튼 클릭 핸들러 ] *****
+          const checkEmail = async () => {
+            clearMessages(); // 중복확인 전에 모든 메시지 초기화
+            didEmailCheck.value = false; // 재확인 시 초기화
+
+            if (!email.value.trim()) {
+              errors.value.email = "이메일을 입력해주세요.";
+              serverMessage.value = "이메일 중복확인을 진행할 수 없습니다.";
+              serverMessageType.value = "error";
+              return;
+            }
+
+            try {
+              const response = await fetch(`/api/signup/email/check`, {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ email: email.value }), // 이메일 값 포함
+              });
+
+              const result = await response.json(); // 응답 데이터 파싱
+
+              if (response.ok) {
+                // 2xx 성공 코드
+                didEmailCheck.value = true;
+                serverMessage.value = "사용 가능한 이메일입니다.";
+                serverMessageType.value = "success";
+              } else {
+                // 4xx, 5xx 오류 코드
+                didEmailCheck.value = false;
+                if (response.status === 400 && result.errors) {
+                  errors.value = result.errors; // 필드별 에러 업데이트
+                  serverMessage.value = "입력값을 다시 확인해주세요.";
+                  serverMessageType.value = "error";
+                } else {
+                  serverMessage.value =
+                    result.message || "이메일 중복 확인 중 오류가 발생했습니다.";
+                  serverMessageType.value = "error";
+                }
+              }
+            } catch (error) {
+              console.error("이메일 중복 확인 중 네트워크 오류:", error);
+              serverMessage.value =
+                "네트워크 오류 또는 서버 응답 처리 중 문제가 발생했습니다.";
+              serverMessageType.value = "error";
+              didEmailCheck.value = false;
+            }
+          };
+
+          // ***** [ '회원가입' 폼 제출 핸들러 ] *****
+          const submitForm = async () => {
+            clearMessages(); // 폼 제출 전에 모든 메시지 초기화
+
+            // 1. 클라이언트 측 유효성 검사
+            if (!validateForm()) {
+              serverMessage.value = "입력값을 다시 확인해주세요.";
+              serverMessageType.value = "error";
+              return; // 유효성 검사 실패 시 제출 중단
+            }
+
+            // 2. 이메일 중복 확인 여부 검사
+            if (!didEmailCheck.value) {
+              serverMessage.value = "이메일 중복확인을 먼저 진행해주세요.";
+              serverMessageType.value = "error";
+              errors.value.email = "이메일 중복확인이 필요합니다."; // 이메일 필드에 에러 표시
+              return;
+            }
+
+            // 3. 서버로 전송할 페이로드 구성
+            const payload = {
+              email: email.value,
+              password: password.value,
+              name: name.value,
+            };
+
+            try {
+              // API 호출 (/api/signup)
+              const response = await fetch("/api/signup", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify(payload),
+              });
+
+              const result = await response.json(); // 응답 데이터 파싱
+
+              if (response.ok) {
+                // 2xx 성공 코드
+                serverMessage.value = "회원가입이 성공적으로 완료되었습니다!";
+                serverMessageType.value = "success";
+
+                setTimeout(() => {
+                  window.location.href = "/login"; // 로그인 페이지로 리다이렉트
+                }, 1500);
+              } else {
+                // 4xx, 5xx 오류 코드
+                if (response.status === 400 && result.errors) {
+                  errors.value = result.errors; // 필드별 에러 업데이트
+                  serverMessage.value = "입력값을 다시 확인해주세요.";
+                  serverMessageType.value = "error";
+                } else {
+                  serverMessage.value =
+                    result.message || "회원가입 중 오류가 발생했습니다.";
+                  serverMessageType.value = "error";
+                }
+              }
+            } catch (error) {
+              console.error("회원가입 중 네트워크 오류:", error);
+              serverMessage.value =
+                "네트워크 오류 또는 서버 응답 처리 중 문제가 발생했습니다.";
+              serverMessageType.value = "error";
+            }
+          };
+
+          return {
+            email,
+            password,
+            name,
+            serverMessage,
+            serverMessageType,
+            errors,
+            checkEmail,
+            submitForm,
+          };
+        },
+      }).mount("#app");
+    </script>
+  </body>
+</html>

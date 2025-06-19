@@ -4,7 +4,6 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>새 게시글 작성</title>
-    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <style>
       /* 기존 CSS 스타일은 변경 없이 유지됩니다. */
       body {
@@ -141,6 +140,8 @@
   </head>
   <body>
     <div id="app" class="container">
+      <navbar-component></navbar-component>
+
       <h1>새 게시글 작성</h1>
 
       <div
@@ -197,9 +198,11 @@
       </form>
     </div>
 
-    <script>
-      const { createApp, ref, onMounted } = Vue;
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script type="module">
+        import Navbar from "/components/Navbar.js"; // 경로 확인
 
+        const { createApp, ref, onMounted } = Vue;
       createApp({
         setup() {
           // ***** [ 변수 세팅 ] *****

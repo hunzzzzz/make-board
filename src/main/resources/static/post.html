@@ -4,7 +4,6 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>게시글 조회</title>
-    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <style>
       /* 전체 페이지 기본 스타일 */
       body {
@@ -75,7 +74,7 @@
         color: #444;
         min-height: 150px; /* 최소 높이 */
         padding: 20px 0;
-        border-bottom: 1px solid #eee;
+        /* border-bottom: 1px solid #eee; */ /* 이 부분은 제거된 상태 유지 */
         white-space: pre-wrap; /* 공백과 줄바꿈 유지 */
         word-break: break-word; /* 긴 단어도 잘라 다음 줄로 넘어가도록 */
       }
@@ -84,7 +83,7 @@
       .post-files {
         margin-top: 20px;
         padding-top: 15px;
-        border-top: 1px solid #eee;
+        border-top: 1px solid #eee; /* 이 부분은 다시 추가하여 좋아요 섹션과 첨부파일 섹션 사이에 구분선 역할 */
       }
 
       .post-files h3 {
@@ -170,8 +169,8 @@
         align-items: center;
         margin: 30px 0; /* 상하 여백 */
         padding: 20px 0;
-        border-top: 1px solid #eee;
-        border-bottom: 1px solid #eee;
+        border-top: 1px solid #eee; /* 이 부분을 유지하여 content와 좋아요 섹션 사이에 구분선 */
+        /* border-bottom: 1px solid #eee; */ /* 이 부분을 제거 또는 주석 처리 */
       }
 
       .like-button {
@@ -273,6 +272,7 @@
         text-align: center;
       }
     </style>
+    <link rel="stylesheet" href="/css/navbar.css" />
     <link rel="icon" href="/icons/favicon.ico" type="image/x-icon" />
   </head>
   <body>
@@ -354,7 +354,9 @@
       </template>
     </div>
 
-    <script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script type="module">
+      import Navbar from "/components/Navbar.js"; // 경로 확인
       const { createApp, ref, onMounted } = Vue;
 
       createApp({
@@ -397,7 +399,7 @@
             try {
               // API 호출 (/api/posts/{postId}/like/check)
               const response = await fetch(`/api/posts/${postId}/like/check`);
-              const isLiked = await response.json(); 
+              const isLiked = await response.json();
 
               if (response.ok) {
                 hasLike.value = isLiked;
@@ -471,7 +473,7 @@
 
           // ***** [ 좋아요 여부에 따른 아이콘 경로 반환 ] *****
           const getLikeIconSrc = () => {
-            if (hasLike.value) { 
+            if (hasLike.value) {
               return "/icons/heart.svg";
             } else {
               return "/icons/empty-heart.svg";
@@ -489,10 +491,10 @@
 
               if (response.ok) {
                 hasLike.value = !hasLike.value;
-                await fetchPost(); 
+                await fetchPost();
               } else {
                 const errorData = await response.json();
-                
+
                 alert("좋아요 처리 중 오류가 발생했습니다.");
                 console.error("좋아요 처리 중 오류 발생:", errorData);
               }
@@ -520,7 +522,11 @@
                   window.location.href = "/posts";
                 } else {
                   const errorData = await response.json();
-                  alert(`게시글 삭제 중 오류가 발생했습니다: ${errorData.message || response.statusText}`);
+                  alert(
+                    `게시글 삭제 중 오류가 발생했습니다: ${
+                      errorData.message || response.statusText
+                    }`
+                  );
                   console.error("게시글 삭제 중 오류 발생:", errorData);
                 }
               } catch (error) {
@@ -544,3 +550,4 @@
       }).mount("#app");
     </script>
   </body>
+</html>

@@ -1,0 +1,111 @@
+/* css/navbar.css */
+
+.navbar-container {
+  background-color: #495057; /* 조금 더 진한 회색 (#495057은 짙은 차콜 계열 회색입니다) */
+  padding: 15px 40px;
+  color: #f8f8f8; /* 텍스트 색상을 밝게 변경 (진한 배경에 잘 보이도록) */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* 그림자 유지 */
+  width: 100%;
+  box-sizing: border-box;
+  position: sticky; /* 스크롤 시 상단에 고정 */
+  top: 0;
+  z-index: 1000; /* 다른 요소 위에 표시 */
+}
+
+.navbar-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1200px; /* 내부 콘텐츠 최대 너비 */
+  margin: 0 auto; /* 가운데 정렬 */
+}
+
+.nav-links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  gap: 25px; /* 메뉴 항목 간 간격 */
+}
+
+.nav-link {
+  color: #dee2e6; /* 링크 텍스트 색상 (밝은 회색) */
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 1.1rem;
+  transition: color 0.3s ease; /* 호버 시 부드러운 전환 효과 */
+}
+
+.nav-link:hover {
+  color: #81c784; /* 호버 시 밝은 녹색 계열 (강조색 변경) */
+}
+
+.auth-buttons {
+  display: flex;
+  align-items: center; /* 버튼과 사용자 정보 수직 정렬 */
+  gap: 15px; /* 버튼 간 간격 */
+}
+
+.auth-button {
+  display: inline-block;
+  padding: 8px 18px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.95rem;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  cursor: pointer; /* 버튼에 커서 포인터 추가 */
+}
+
+.signup-button {
+  background-color: #28a745; /* 녹색 계열 (기존 유지) */
+  color: #fff;
+  border: 1px solid #28a745;
+}
+
+.signup-button:hover {
+  background-color: #218838;
+}
+
+.login-button {
+  background-color: #007bff; /* 파란색 계열 (기존 유지) */
+  color: #fff;
+  border: 1px solid #007bff;
+}
+
+.login-button:hover {
+  background-color: #0056b3;
+}
+
+.logout-button {
+  background-color: #dc3545; /* 빨간색 계열 (기존 유지) */
+  color: #fff;
+  border: 1px solid #dc3545;
+}
+
+.logout-button:hover {
+  background-color: #c82333;
+}
+
+.user-info {
+  color: #adb5bd; /* 사용자 정보 텍스트 색상 (밝은 회색) */
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .navbar-nav {
+    flex-direction: column; /* 작은 화면에서 세로로 정렬 */
+    align-items: flex-start; /* 왼쪽 정렬 */
+    gap: 15px;
+  }
+  .nav-links {
+    flex-direction: column;
+    gap: 10px;
+  }
+  .auth-buttons {
+    width: 100%;
+    justify-content: flex-end; /* 버튼을 오른쪽 끝으로 정렬 */
+  }
+}

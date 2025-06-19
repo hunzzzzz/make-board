@@ -205,9 +205,11 @@
       }
     </style>
     <link rel="icon" href="/icons/favicon.ico" type="image/x-icon" />
+    <link rel="stylesheet" href="/css/navbar.css" />
   </head>
   <body>
     <div id="app" class="container">
+      <navbar-component></navbar-component>
       <h1>게시글 목록</h1>
 
       <div class="header-actions">
@@ -283,17 +285,12 @@
 
       <div class="pagination" v-if="pageInfo">
         <span v-if="pageInfo.currentPage <= 1" class="disabled">이전</span>
-        <a
-          v-else
-          href="#"
-          @click.prevent="fetchPosts(pageInfo.currentPage - 1)"
+        <a v-else href="#" @click.prevent="fetchPosts(pageInfo.currentPage - 1)"
           >이전</a
         >
 
         <template v-for="pageNumber in getPageNumbers()">
-          <span
-            v-if="pageNumber === pageInfo.currentPage"
-            class="current-page"
+          <span v-if="pageNumber === pageInfo.currentPage" class="current-page"
             >{{ pageNumber }}</span
           >
           <a v-else href="#" @click.prevent="fetchPosts(pageNumber)"
@@ -306,21 +303,24 @@
           class="disabled"
           >다음</span
         >
-        <a
-          v-else
-          href="#"
-          @click.prevent="fetchPosts(pageInfo.currentPage + 1)"
+        <a v-else href="#" @click.prevent="fetchPosts(pageInfo.currentPage + 1)"
           >다음</a
         >
       </div>
     </div>
 
-    <script>
+    <script type="module">
+      import Navbar from './components/Navbar.js';
+
       const { createApp, ref, onMounted, computed } = Vue;
 
       createApp({
+        components: {
+          'navbar-component': Navbar
+        },
+
         setup() {
-        // ***** [ 변수 세팅 ] *****
+          // ***** [ 변수 세팅 ] *****
           const posts = ref([]);
           const pageInfo = ref(null);
           const currentPage = ref(1);
@@ -356,7 +356,6 @@
             }
           };
 
-          
           // ***** [ 마운트 시 게시글 목록 조회 ] *****
           onMounted(() => {
             // URL에서 초기 검색 조건 가져오기

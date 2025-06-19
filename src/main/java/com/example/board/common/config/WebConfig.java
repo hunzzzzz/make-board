@@ -8,6 +8,8 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class WebConfig implements WebMvcConfigurer {
 	@Override
 	public void addViewControllers(ViewControllerRegistry registry) {
+		// 회원가입
+		registry.addViewController("/signup").setViewName("signup.html");
 		// 게시글 목록
 		registry.addViewController("/posts").setViewName("posts.html");
 		registry.addViewController("/").setViewName("posts.html");

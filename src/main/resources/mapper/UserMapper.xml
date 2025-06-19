@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.board.user.mapper.UserMapper">
+	<!-- 회원가입 -->
+	<insert id="signup">
+		INSERT INTO t_board_user(id, email, password, name)
+		VALUES (#{userId, jdbcType=VARCHAR}, #{email}, #{password}, #{name})
+	</insert>
+
+	<select id="isUsingEmail">
+		SELECT count(*)
+		FROM t_board_user
+		WHERE email=#{email}
+	</select>
+</mapper>
