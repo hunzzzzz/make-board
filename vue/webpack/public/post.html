@@ -163,6 +163,52 @@
         text-align: center;
       }
 
+      /* 좋아요 버튼 섹션 */
+      .like-section {
+        display: flex;
+        justify-content: center; /* 중앙 정렬 */
+        align-items: center;
+        margin: 30px 0; /* 상하 여백 */
+        padding: 20px 0;
+        border-top: 1px solid #eee;
+        border-bottom: 1px solid #eee;
+      }
+
+      .like-button {
+        background-color: #e0f2fe; /* 연한 파란색 배경 */
+        color: #3b82f6; /* 파란색 텍스트 */
+        border: 1px solid #93c5fd;
+        border-radius: 9999px; /* 동그란 버튼 */
+        padding: 12px 25px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 8px; /* 아이콘과 텍스트 사이 간격 */
+        cursor: pointer;
+        transition: background-color 0.2s ease, transform 0.2s ease,
+          box-shadow 0.2s ease;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      }
+
+      .like-button:hover {
+        background-color: #dbeafe; /* 호버 시 더 연한 파란색 */
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+      }
+
+      .like-button img {
+        width: 24px;
+        height: 24px;
+      }
+
+      .like-count {
+        font-size: 1.2rem;
+        font-weight: bold;
+        margin-left: 5px; /* 버튼과의 간격 */
+        color: #333;
+      }
+
       /* 버튼 그룹 */
       .post-actions {
         display: flex;
@@ -224,6 +270,7 @@
         border: 1px dashed #ccc;
         border-radius: 8px;
         background-color: #f9f9f9;
+        text-align: center;
       }
     </style>
     <link rel="icon" href="/icons/favicon.ico" type="image/x-icon" />
@@ -252,6 +299,15 @@
         </div>
 
         <div class="post-content">{{ post.content }}</div>
+
+        <div class="like-section">
+          <button type="button" class="like-button" @click="toggleLike">
+            <img :src="getLikeIconSrc()" alt="좋아요" />
+            <span>좋아요</span>
+            <span class="like-count">{{ post.likeCount }}</span>
+          </button>
+        </div>
+
         <div class="post-files">
           <h3>첨부파일</h3>
           <template v-if="post.files && post.files.length > 0">
@@ -306,10 +362,10 @@
           // ***** [ 변수 세팅 ] *****
           const post = ref(null);
           const postId = window.location.pathname.split("/").pop(); // URI에서 postId 추출
+          const hasLike = ref(false);
 
           // ***** [ 게시글 불러오기 ] *****
           const fetchPost = async () => {
-            // API 호출 (/api/posts/{postId})
             try {
               const response = await fetch(`/api/posts/${postId}`);
               const data = await response.json();
@@ -327,18 +383,38 @@
 
                 window.location.href = `/error-page?${params.toString()}`; // 에러 페이지로 리다이렉트
               } else {
-                console.error("게시글 등록 중 오류가 발생했습니다.");
+                console.error("게시글 조회 중 오류가 발생했습니다");
                 post.value = null;
               }
             } catch (error) {
-              console.error("에러 발생:", error);
+              console.error("게시글 조회 중 네트워크 에러 발생:", error);
               post.value = null;
             }
           };
 
-          // ***** [ 마운트 시 게시글 조회 ] *****
+          // ***** [ 해당 게시글에 좋아요를 눌렀는지 확인 ] *****
+          const checkLike = async () => {
+            try {
+              // API 호출 (/api/posts/{postId}/like/check)
+              const response = await fetch(`/api/posts/${postId}/like/check`);
+              const isLiked = await response.json(); 
+
+              if (response.ok) {
+                hasLike.value = isLiked;
+              } else {
+                console.error("좋아요 상태 확인 중 오류 발생");
+                hasLike.value = false;
+              }
+            } catch (error) {
+              console.error("좋아요 상태 확인 중 네트워크 에러 발생:", error);
+              hasLike.value = false;
+            }
+          };
+
+          // ***** [ 마운트 시 게시글 조회 및 좋아요 상태 확인 ] *****
           onMounted(() => {
             fetchPost();
+            checkLike();
           });
 
           // ***** [ 첨부파일 다운로드 URL 생성 ] *****
@@ -393,6 +469,39 @@
             }
           };
 
+          // ***** [ 좋아요 여부에 따른 아이콘 경로 반환 ] *****
+          const getLikeIconSrc = () => {
+            if (hasLike.value) { 
+              return "/icons/heart.svg";
+            } else {
+              return "/icons/empty-heart.svg";
+            }
+          };
+
+          // ***** [ 좋아요 버튼을 클릭한 경우 ] *****
+          const toggleLike = async () => {
+            const method = hasLike.value ? "DELETE" : "POST";
+
+            try {
+              const response = await fetch(`/api/posts/${postId}/like`, {
+                method: method,
+              });
+
+              if (response.ok) {
+                hasLike.value = !hasLike.value;
+                await fetchPost(); 
+              } else {
+                const errorData = await response.json();
+                
+                alert("좋아요 처리 중 오류가 발생했습니다.");
+                console.error("좋아요 처리 중 오류 발생:", errorData);
+              }
+            } catch (error) {
+              alert("네트워크 오류로 좋아요 처리에 실패했습니다.");
+              console.error("좋아요 처리 중 네트워크 에러 발생:", error);
+            }
+          };
+
           // ***** [ 수정 버튼을 클릭한 경우 ] *****
           const editPost = (postId) => {
             window.location.href = `/posts/${postId}/edit`;
@@ -408,11 +517,14 @@
 
                 if (response.ok) {
                   alert("게시글이 삭제되었습니다.");
-
                   window.location.href = "/posts";
+                } else {
+                  const errorData = await response.json();
+                  alert(`게시글 삭제 중 오류가 발생했습니다: ${errorData.message || response.statusText}`);
+                  console.error("게시글 삭제 중 오류 발생:", errorData);
                 }
               } catch (error) {
-                console.error("에러 발생:", error);
+                console.error("게시글 삭제 중 네트워크 에러 발생:", error);
                 alert("게시글 삭제 중 에러가 발생했습니다.");
               }
             }
@@ -423,6 +535,8 @@
             getFileDownloadUrl,
             formatFileSize,
             getFileIconSrc,
+            getLikeIconSrc,
+            toggleLike,
             editPost,
             deletePost,
           };
@@ -430,4 +544,3 @@
       }).mount("#app");
     </script>
   </body>
-</html>

@@ -41,4 +41,10 @@ public interface PostMapper {
 	 * 게시글 삭제에 필요한 메서드
 	 */
 	void delete(long postId, String deletedPostTitle);
+	
+	/*
+	 * 게시글 좋아요에 필요한 메서드
+	 */
+	void incrementLikeCount(long postId);
+	void decrementLikeCount(long postId);
 }

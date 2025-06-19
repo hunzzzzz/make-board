@@ -127,10 +127,6 @@
             errorTitle.value = urlParams.get("title");
             errorMessage.value = urlParams.get("message");
 
-            console.log(errorCode.value);
-            console.log(errorTitle.value);
-            console.log(errorMessage.value);
-
             // HTML 페이지의 title도 업데이트 (선택 사항)
             document.title = `오류 발생 - ${errorTitle.value}`;
           });

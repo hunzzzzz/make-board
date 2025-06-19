@@ -164,5 +164,20 @@
 			status='DELETED'
 		WHERE id=#{postId} 
 	</update>
+	
+	<!-- 좋아요 -->
+	<update id="incrementLikeCount">
+		UPDATE t_board_post
+		SET
+			like_count = like_count + 1
+		WHERE id=#{postId}
+	</update>
+	
+	<update id="decrementLikeCount">
+		UPDATE t_board_post
+		SET
+			like_count = like_count - 1
+		WHERE id=#{postId}
+	</update>
 
 </mapper>
