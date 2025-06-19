@@ -11,6 +11,7 @@ import com.example.board.common.exception.file.FileStorageException;
 import com.example.board.common.exception.post.PostAccessException;
 import com.example.board.common.exception.post.PostNotFoundException;
 import com.example.board.common.exception.user.EmailDuplicateException;
+import com.example.board.common.exception.user.LoginException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -25,6 +26,14 @@ public class GlobalExceptionHandler {
 	// 이메일 중복 시
 	@ExceptionHandler(EmailDuplicateException.class)
 	private ResponseEntity<ErrorResponse> handleEmailDuplicateException(EmailDuplicateException e) {
+		ErrorResponse error = ErrorResponse.of(e.getMessage());
+
+		return ResponseEntity.badRequest().body(error);
+	}
+	
+	// 로그인 정보 불일치
+	@ExceptionHandler(LoginException.class)
+	private ResponseEntity<ErrorResponse> handleLoginException(LoginException e) {
 		ErrorResponse error = ErrorResponse.of(e.getMessage());
 
 		return ResponseEntity.badRequest().body(error);

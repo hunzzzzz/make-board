@@ -10,6 +10,8 @@ public class WebConfig implements WebMvcConfigurer {
 	public void addViewControllers(ViewControllerRegistry registry) {
 		// 회원가입
 		registry.addViewController("/signup").setViewName("signup.html");
+		// 로그인
+		registry.addViewController("/login").setViewName("login.html");
 		// 게시글 목록
 		registry.addViewController("/posts").setViewName("posts.html");
 		registry.addViewController("/").setViewName("posts.html");

@@ -1,0 +1,148 @@
+body {
+  font-family: "Inter", sans-serif;
+  background-color: #f3f4f6;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.container {
+  background-color: #fff;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  width: 500px;
+  max-width: 750px;
+  box-sizing: border-box;
+}
+
+h2 {
+  font-size: 2.75rem;
+  font-weight: bold;
+  text-align: center;
+  color: #333;
+  margin-bottom: 30px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #555;
+  margin-bottom: 8px;
+}
+
+.input-group {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+input[type="email"],
+input[type="password"],
+input[type="text"] {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 1rem;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
+  box-sizing: border-box;
+  min-width: 250px; /* 입력 필드 최소 너비 확보 */
+}
+
+.input-group input[type="email"] {
+  flex-grow: 1;
+  width: auto;
+}
+
+.input-group button {
+  flex-shrink: 0;
+  width: 100px;
+  padding: 12px 10px;
+}
+
+input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+}
+
+button {
+  background-color: #2563eb;
+  color: #fff;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+button:hover {
+  background-color: #1d4ed8;
+}
+
+button[type="submit"] {
+  width: 100%;
+  background-color: #4f46e5;
+  padding: 12px 18px;
+}
+
+button[type="submit"]:hover {
+  background-color: #4338ca;
+}
+
+.error-message {
+  color: #ef4444;
+  font-size: 0.875rem;
+  margin-top: 5px;
+}
+
+.link-text {
+  margin-top: 30px;
+  text-align: center;
+  font-size: 0.875rem;
+  color: #666;
+}
+
+.link-text a {
+  color: #4f46e5;
+  text-decoration: none;
+  font-weight: 500;
+  margin-left: 5px;
+}
+
+.link-text a:hover {
+  text-decoration: underline;
+}
+
+.message {
+  padding: 10px;
+  margin-bottom: 15px;
+  border-radius: 8px;
+  text-align: center;
+  font-weight: bold;
+}
+
+.message.success {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.message.error {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
