@@ -17,5 +17,7 @@ public class WebConfig implements WebMvcConfigurer {
 		registry.addViewController("/posts/{postId:\\d+}/edit").setViewName("forward:/post-edit-form.html");
 		// 게시글 단건 조회
 		registry.addViewController("/posts/{postId:\\d+}").setViewName("forward:/post.html");
+		// 에러 페이지
+		registry.addViewController("/error-page").setViewName("error-page.html");
 	}
 }

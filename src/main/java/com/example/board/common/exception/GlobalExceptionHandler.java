@@ -1,5 +1,6 @@
 package com.example.board.common.exception;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -38,13 +39,13 @@ public class GlobalExceptionHandler {
 	ResponseEntity<ErrorResponse> handlePostAccessException(PostAccessException e) {
 		ErrorResponse error = ErrorResponse.of(e.message, "접근 권한이 없습니다", e.statusCode);
 		
-		return ResponseEntity.badRequest().body(error);
+		return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
 	}
 	
 	@ExceptionHandler(PostNotFoundException.class)
 	ResponseEntity<ErrorResponse> handlePostNotFoundException(PostNotFoundException e) {
 		ErrorResponse error = ErrorResponse.of(e.message, "페이지를 찾을 수 없습니다", e.statusCode);
 		
-		return ResponseEntity.badRequest().body(error);
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
 	}
 }
