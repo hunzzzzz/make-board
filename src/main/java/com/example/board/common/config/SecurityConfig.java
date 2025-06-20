@@ -40,6 +40,7 @@ public class SecurityConfig {
                     "/posts",
                     "/posts/{postId}",
                     "/posts/add",
+                    "/posts/{postId}/edit",
                     
                     "/signup.html",
                     "/login.html",

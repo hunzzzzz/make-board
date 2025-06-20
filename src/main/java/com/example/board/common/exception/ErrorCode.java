@@ -7,6 +7,7 @@ public enum ErrorCode {
 	INVALID_LOGIN_INFO,              // 로그인 정보 불일치
 	
 	POST_NOT_FOUND,                  // 존재하지 않는 게시글
+	CANNOT_UPDATE_OTHERS_POST,       // 다른 유저의 게시글을 수정 시도
 	CANNOT_DELETE_OTHERS_POST,       // 다른 유저의 게시글을 삭제 시도
 	CANNOT_READ_DELETED_POST,        // 삭제된 게시글에 접근 시도
 	

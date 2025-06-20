@@ -46,6 +46,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             PathPatternRequestMatcher.withDefaults().matcher("/posts"),
             PathPatternRequestMatcher.withDefaults().matcher("/posts/{postId}"),
             PathPatternRequestMatcher.withDefaults().matcher("/posts/add"),
+            PathPatternRequestMatcher.withDefaults().matcher("/posts/{postId}/edit"),
 
             // 인증이 불필요한 API 호출
             PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.POST, "/api/signup/**"),

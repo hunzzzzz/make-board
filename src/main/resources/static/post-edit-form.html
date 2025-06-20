@@ -326,6 +326,8 @@
           const serverMessage = ref("");
           const serverMessageType = ref("");
 
+          const accessToken = localStorage.getItem("accessToken");
+
           // ***** [ 서버 메시지 초기화 ] *****
           const clearMessages = () => {
             serverMessage.value = "";
@@ -353,7 +355,11 @@
           // ***** [ 기존 게시글 정보 조회 ] *****
           const fetchPost = async () => {
             try {
-              const response = await fetch(`/api/posts/${postId}/edit`);
+              const response = await fetch(`/api/posts/${postId}/edit`, {
+                headers: {
+                  Authorization: accessToken,
+                },
+              });
               const data = await response.json();
 
               // 성공
@@ -429,6 +435,9 @@
             // API 호출 (/api/posts/{postId})
             try {
               const response = await fetch(`/api/posts/${postId}`, {
+                headers: {
+                  Authorization: accessToken,
+                },
                 method: "PUT",
                 body: formData,
               });
@@ -449,6 +458,14 @@
                 errors.value = result.errors;
                 serverMessage.value = "입력값을 다시 확인해주세요.";
                 serverMessageType.value = "error";
+              } else if (
+                response.status === 401 &&
+                result.errorCode === "EXPIRED_ATK"
+              ) {
+                alert("인증이 만료되었습니다. 다시 로그인해주세요.");
+                localStorage.removeItem("accessToken");
+
+                window.location.href = "/login";
               }
               // 기타 오류
               else {

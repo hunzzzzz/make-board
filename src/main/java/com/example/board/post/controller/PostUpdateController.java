@@ -25,10 +25,7 @@ public class PostUpdateController {
 	ResponseEntity<Object> update(
 			@PathVariable long postId,
 			@Valid @ModelAttribute PostUpdateRequest request
-	) {
-		System.out.println(request.getDeletedFileIds());
-		System.out.println(request.getFiles());
-		
+	) {		
 		postUpdateService.update(postId, request);
 		
 		return ResponseEntity.ok(Collections.EMPTY_MAP);

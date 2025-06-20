@@ -1,5 +1,7 @@
 package com.example.board.post.service;
 
+import java.util.UUID;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -9,13 +11,13 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @Service
-public class PostDeleteService {
+public class PostCheckAuthorService {
 	private final PostMapper postMapper;
-	private static final String DELETED_POST_TITLE = "삭제된 게시글입니다.";
 
-	@Transactional
-	public void delete(long postId) {
-		postMapper.delete(postId, DELETED_POST_TITLE);
+	@Transactional(readOnly = true)
+	public boolean checkAuthor(long postId, UUID userId) {
+		UUID authorId = postMapper.getAuthorId(postId);
+		
+		return userId.equals(authorId);
 	}
-
 }
