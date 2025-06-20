@@ -271,6 +271,138 @@
         background-color: #f9f9f9;
         text-align: center;
       }
+
+      /* 댓글 섹션 스타일 */
+      .comments-section {
+        margin-top: 40px;
+        padding-top: 30px;
+        border-top: 1px solid #eee;
+      }
+
+      .comments-section h2 {
+        font-size: 1.8rem;
+        color: #333;
+        margin-bottom: 25px;
+        text-align: center;
+      }
+
+      /* 댓글 목록 */
+      .comment-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+
+      .comment-item {
+        background-color: #fefefe;
+        border: 1px solid #e9e9e9;
+        border-radius: 8px;
+        padding: 15px 20px;
+        margin-bottom: 15px;
+      }
+
+      .comment-item:last-child {
+        margin-bottom: 0;
+      }
+
+      .comment-author {
+        font-weight: 600;
+        color: #555;
+        margin-bottom: 5px;
+      }
+
+      .comment-content {
+        font-size: 1rem;
+        color: #444;
+        line-height: 1.6;
+        word-break: break-word;
+        margin-bottom: 10px;
+      }
+
+      .comment-meta {
+        font-size: 0.85rem;
+        color: #888;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .comment-actions button {
+        background: none;
+        border: none;
+        color: #6366f1; /* 파란색 계열 */
+        cursor: pointer;
+        font-size: 0.85rem;
+        margin-left: 10px;
+        padding: 3px 5px;
+        border-radius: 4px;
+        transition: background-color 0.2s ease;
+      }
+
+      .comment-actions button:hover {
+        background-color: #eff6ff; /* 연한 파란색 배경 */
+        text-decoration: underline;
+      }
+
+      .comment-actions .delete-comment-button {
+        color: #ef4444; /* 빨간색 계열 */
+      }
+
+      .comment-actions .delete-comment-button:hover {
+        background-color: #fee2e2;
+      }
+
+      .no-comments-message {
+        text-align: center;
+        font-size: 1rem;
+        color: #888;
+        padding: 30px;
+        border: 1px dashed #e0e0e0;
+        border-radius: 8px;
+        background-color: #fcfcfc;
+      }
+
+      /* 댓글 작성 폼 */
+      .comment-form {
+        margin-top: 30px;
+        padding: 20px;
+        background-color: #f9f9f9;
+        border: 1px solid #e0e0e0;
+        border-radius: 10px;
+      }
+
+      .comment-form textarea {
+        width: calc(100% - 20px);
+        min-height: 80px;
+        padding: 10px;
+        margin-bottom: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        font-size: 1rem;
+        resize: vertical;
+      }
+
+      .comment-form button {
+        padding: 10px 20px;
+        background-color: #22c55e; /* 녹색 계열 */
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        float: right; /* 버튼을 오른쪽으로 정렬 */
+      }
+
+      .comment-form button:hover {
+        background-color: #16a34a;
+      }
+
+      .comment-form::after {
+        content: "";
+        display: block;
+        clear: both; /* float 해제 */
+      }
     </style>
     <link rel="stylesheet" href="/css/navbar.css" />
     <link rel="icon" href="/icons/favicon.ico" type="image/x-icon" />
@@ -353,6 +485,49 @@
           </button>
           <a href="/posts" class="action-button list-button">목록으로</a>
         </div>
+
+        <div class="comments-section">
+          <h2>댓글</h2>
+
+          <ul class="comment-list">
+            <template v-if="comments.length > 0">
+              <li
+                v-for="comment in comments"
+                :key="comment.commentId"
+                class="comment-item"
+              >
+                <div class="comment-author">{{ comment.author }}</div>
+                <div class="comment-content">{{ comment.content }}</div>
+                <div class="comment-meta">
+                  <span>{{ comment.formattedCreatedAt }}</span>
+                  <div class="comment-actions">
+                    <button
+                      type="button"
+                      class="delete-comment-button"
+                      @click="deleteComment(comment.commentId)"
+                    >
+                      삭제
+                    </button>
+                  </div>
+                </div>
+              </li>
+            </template>
+            <template v-else>
+              <p class="no-comments-message">
+                아직 댓글이 없습니다. 첫 댓글을 작성해보세요!
+              </p>
+            </template>
+          </ul>
+
+          <div class="comment-form">
+            <h3>댓글 작성</h3>
+            <textarea
+              v-model="newCommentContent"
+              placeholder="댓글을 입력하세요..."
+            ></textarea>
+            <button type="button" @click="addComment">등록</button>
+          </div>
+        </div>
       </template>
     </div>
 
@@ -372,8 +547,11 @@
           const post = ref(null);
           const postId = window.location.pathname.split("/").pop(); // URI에서 postId 추출
           const hasLike = ref(false);
+          const comments = ref([]); // 🚨 댓글 목록을 저장할 변수
+          const newCommentContent = ref(""); // 🚨 새 댓글 내용을 저장할 변수
 
           const accessToken = localStorage.getItem("accessToken");
+          // const loggedInUserId = localStorage.getItem("userId"); // 🚨 로그인한 사용자 ID 가져오기 - isAuthor 제거로 필요 없음
 
           // ***** [ 게시글 불러오기 ] *****
           const fetchPost = async () => {
@@ -422,10 +600,34 @@
             }
           };
 
-          // ***** [ 마운트 시 게시글 조회 및 좋아요 상태 확인 ] *****
+          // ***** [ 댓글 목록 불러오기 ] 🚨 새로 추가 🚨 *****
+          const fetchComments = async () => {
+            try {
+              const response = await fetch(`/api/posts/${postId}/comments`);
+              const data = await response.json(); // 댓글 목록 (배열 형태)
+
+              if (response.ok) {
+                // 각 댓글에 isAuthor 플래그 추가 (프론트엔드에서 현재 유저와 댓글 작성자 일치 여부 확인)
+                comments.value = data.map((comment) => ({
+                  ...comment,
+                  // isAuthor 관련 코드 제거
+                  // isAuthor: String(comment.userId) === String(loggedInUserId)
+                }));
+              } else {
+                console.error("댓글 목록 조회 중 오류 발생");
+                comments.value = [];
+              }
+            } catch (error) {
+              console.error("댓글 목록 조회 중 네트워크 에러 발생:", error);
+              comments.value = [];
+            }
+          };
+
+          // ***** [ 마운트 시 게시글 조회, 좋아요 상태, 댓글 목록 확인 ] *****
           onMounted(() => {
             fetchPost();
             checkLike();
+            fetchComments(); // 🚨 댓글 목록도 함께 불러오기
           });
 
           // ***** [ 첨부파일 다운로드 URL 생성 ] *****
@@ -491,6 +693,12 @@
 
           // ***** [ 좋아요 버튼을 클릭한 경우 ] *****
           const toggleLike = async () => {
+            // 토큰이 없으면 로그인 필요 알림 후 종료
+            if (!accessToken) {
+              alert("로그인 후 좋아요를 누를 수 있습니다.");
+              return;
+            }
+
             const method = hasLike.value ? "DELETE" : "POST";
 
             try {
@@ -505,7 +713,7 @@
 
               if (response.ok) {
                 hasLike.value = !hasLike.value;
-                await fetchPost();
+                await fetchPost(); // 좋아요 수 업데이트를 위해 게시글 정보를 다시 불러옴
               } else if (
                 response.status === 401 &&
                 result.errorCode === "EXPIRED_ATK"
@@ -526,13 +734,23 @@
 
           // ***** [ 수정 버튼을 클릭한 경우 ] *****
           const editPost = async (postId) => {
+            // 토큰이 없으면 로그인 필요 알림 후 종료
+            if (!accessToken) {
+              alert("게시글을 수정하려면 로그인해야 합니다.");
+              window.location.href = "/login";
+              return;
+            }
+
             try {
-              const response = await fetch(`/api/posts/${postId}/author/check`, {
-                headers: {
-                  Authorization: accessToken,
-                },
-                method: "GET",
-              });
+              const response = await fetch(
+                `/api/posts/${postId}/author/check`,
+                {
+                  headers: {
+                    Authorization: accessToken,
+                  },
+                  method: "GET",
+                }
+              );
 
               if (response.ok) {
                 const result = await response.json();
@@ -556,7 +774,7 @@
                 alert("페이지 새로고침 후 다시 시도해주세요.");
               }
             } catch (error) {
-              console.log(erorr)
+              console.error(error);
               alert(
                 "네트워크 오류 또는 서버 응답 처리 중 문제가 발생했습니다."
               );
@@ -567,6 +785,7 @@
           const deletePost = async () => {
             if (!accessToken) {
               alert("게시글을 삭제하려면 로그인해야 합니다.");
+              window.location.href = "/login";
               return;
             }
 
@@ -607,8 +826,109 @@
             }
           };
 
+          // ***** [ 댓글 추가 함수 ] 🚨 새로 추가 🚨 *****
+          const addComment = async () => {
+            if (!accessToken) {
+              alert("댓글을 작성하려면 로그인해야 합니다.");
+              window.location.href = "/login";
+              return;
+            }
+            if (newCommentContent.value.trim() === "") {
+              alert("댓글 내용을 입력해주세요.");
+              return;
+            }
+
+            try {
+              const response = await fetch(`/api/posts/${postId}/comments`, {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: accessToken,
+                },
+                body: JSON.stringify({ content: newCommentContent.value }),
+              });
+              const result = await response.json();
+
+              if (response.ok) {
+                alert("댓글이 성공적으로 작성되었습니다.");
+                newCommentContent.value = ""; // 댓글 입력창 비우기
+                await fetchComments(); // 댓글 목록 새로고침
+              } else if (
+                response.status === 401 &&
+                result.errorCode === "EXPIRED_ATK"
+              ) {
+                alert("인증이 만료되었습니다. 다시 로그인해주세요.");
+                localStorage.removeItem("accessToken");
+                window.location.href = "/login";
+              } else if (response.status === 403) {
+                alert("댓글 작성 권한이 없습니다.");
+              } else {
+                alert(
+                  "댓글 작성 중 오류가 발생했습니다. 페이지 새로고침 후 다시 시도해주세요."
+                );
+                console.error("댓글 작성 실패:", result);
+              }
+            } catch (error) {
+              console.error("댓글 작성 중 네트워크 에러 발생:", error);
+              alert(
+                "네트워크 오류 또는 서버 응답 처리 중 문제가 발생했습니다."
+              );
+            }
+          };
+
+          // ***** [ 댓글 삭제 함수 ] 🚨 새로 추가 🚨 *****
+          const deleteComment = async (commentId) => {
+            if (!accessToken) {
+              alert("댓글을 삭제하려면 로그인해야 합니다.");
+              window.location.href = "/login";
+              return;
+            }
+            if (!confirm("정말로 이 댓글을 삭제하시겠습니까?")) {
+              return;
+            }
+
+            try {
+              const response = await fetch(`/api/comments/${commentId}`, {
+                // 댓글 삭제는 /api/comments/{commentId}로 가정
+                method: "DELETE",
+                headers: {
+                  Authorization: accessToken,
+                },
+              });
+              const result = await response.json();
+
+              if (response.ok) {
+                alert("댓글이 삭제되었습니다.");
+                await fetchComments(); // 댓글 목록 새로고침
+              } else if (
+                response.status === 401 &&
+                result.errorCode === "EXPIRED_ATK"
+              ) {
+                alert("인증이 만료되었습니다. 다시 로그인해주세요.");
+                localStorage.removeItem("accessToken");
+                window.location.href = "/login";
+              } else if (response.status === 403) {
+                alert("다른 유저의 댓글을 삭제할 수 없습니다.");
+              } else if (response.status === 404) {
+                alert("삭제할 댓글을 찾을 수 없습니다.");
+              } else {
+                alert(
+                  "댓글 삭제 중 오류가 발생했습니다. 페이지 새로고침 후 다시 시도해주세요."
+                );
+                console.error("댓글 삭제 실패:", result);
+              }
+            } catch (error) {
+              console.error("댓글 삭제 중 네트워크 에러 발생:", error);
+              alert(
+                "네트워크 오류 또는 서버 응답 처리 중 문제가 발생했습니다."
+              );
+            }
+          };
+
           return {
             post,
+            comments,
+            newCommentContent,
             getFileDownloadUrl,
             formatFileSize,
             getFileIconSrc,
@@ -616,6 +936,8 @@
             toggleLike,
             editPost,
             deletePost,
+            addComment,
+            deleteComment,
           };
         },
       }).mount("#app");

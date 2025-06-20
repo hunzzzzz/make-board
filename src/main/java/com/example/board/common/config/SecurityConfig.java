@@ -41,6 +41,7 @@ public class SecurityConfig {
                     "/posts/{postId}",
                     "/posts/add",
                     "/posts/{postId}/edit",
+                    "/error-page",
                     
                     "/signup.html",
                     "/login.html",
@@ -61,6 +62,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/posts").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/posts/{postId}").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/posts/{postId}/like/check").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/posts/{postId}/comments").permitAll()
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
             )

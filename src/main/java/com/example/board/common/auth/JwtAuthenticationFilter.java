@@ -17,7 +17,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.stereotype.Component;
-import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.example.board.common.component.JwtProvider;
@@ -47,6 +46,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             PathPatternRequestMatcher.withDefaults().matcher("/posts/{postId}"),
             PathPatternRequestMatcher.withDefaults().matcher("/posts/add"),
             PathPatternRequestMatcher.withDefaults().matcher("/posts/{postId}/edit"),
+            PathPatternRequestMatcher.withDefaults().matcher("/error-page"),
 
             // 인증이 불필요한 API 호출
             PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.POST, "/api/signup/**"),
@@ -54,6 +54,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.GET, "/api/posts"),
             PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.GET, "/api/posts/{postId}"),
             PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.GET, "/api/posts/{postId}/like/check"),
+            PathPatternRequestMatcher.withDefaults().matcher(HttpMethod.GET, "/api/posts/{postId}/comments"),
 
             // 매핑 HTML 파일
             PathPatternRequestMatcher.withDefaults().matcher("/signup.html"),
