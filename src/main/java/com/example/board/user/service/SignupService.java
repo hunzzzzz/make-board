@@ -34,6 +34,6 @@ public class SignupService {
 		int result = userMapper.isUsingEmail(email);
 
 		if (result == 1)
-			throw new EmailDuplicateException("이미 사용 중인 이메일입니다.");
+			throw new EmailDuplicateException();
 	}
 }

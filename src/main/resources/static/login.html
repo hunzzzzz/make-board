@@ -48,10 +48,10 @@
             </p>
           </div>
 
+          <!-- 로그인 버튼 -->
           <button type="submit">로그인</button>
         </form>
 
-        <!-- 회원가입 버튼 -->
         <p class="link-text">
           계정이 없으신가요?<a href="/signup">회원가입</a>
         </p>
@@ -64,7 +64,7 @@
 
       createApp({
         setup() {
-            // 변수 설정
+          // 변수 설정
           const email = ref("");
           const password = ref("");
 
@@ -82,7 +82,7 @@
           // 입력값 검증
           const validateForm = () => {
             clearMessages();
-            let isValid = true;
+            var isValid = true;
             const newErrors = {};
 
             if (!email.value.trim()) {
@@ -130,7 +130,6 @@
 
               if (response.ok) {
                 const accessToken = await response.text();
-
                 localStorage.setItem("accessToken", accessToken);
 
                 serverMessage.value = "로그인이 성공적으로 완료되었습니다!";
@@ -139,18 +138,16 @@
                 setTimeout(() => {
                   window.location.href = "/";
                 }, 1500);
-              } else {
-                const errorData = await response.json();
-                serverMessage.value =
-                  errorData.message || "로그인 중 오류가 발생했습니다.";
-                serverMessageType.value = "error";
+              } else if (response.status === 400 && "INVALID_LOGIN_INFO") {
+                const error = await response.json();
 
-                if (errorData.errors) {
-                  errors.value = errorData.errors;
-                }
+                serverMessage.value = error.message;
+                serverMessageType.value = "error";
+              } else {
+                serverMessage.value = "로그인 중 오류가 발생했습니다.";
+                serverMessageType.value = "error";
               }
             } catch (error) {
-              console.error("로그인 중 네트워크 오류:", error);
               serverMessage.value =
                 "네트워크 오류 또는 서버 응답 처리 중 문제가 발생했습니다.";
               serverMessageType.value = "error";

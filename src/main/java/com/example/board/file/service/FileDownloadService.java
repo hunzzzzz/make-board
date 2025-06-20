@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 
-import com.example.board.common.exception.file.FileStorageException;
+import com.example.board.common.exception.file.FileSystemException;
 import com.example.board.file.dto.response.FileDownloadResponse;
 import com.example.board.file.mapper.FileMapper;
 
@@ -31,7 +31,7 @@ public class FileDownloadService {
 
 		try {
 			if (file == null)
-				throw new FileStorageException("존재하지 않는 파일입니다.");
+				throw new FileSystemException();
 
 			Path filePath = Paths.get(uploadDir, file.getSavedFileName());
 			file.setResource(new UrlResource(filePath.toUri()));
@@ -39,7 +39,7 @@ public class FileDownloadService {
 			return file;
 		} catch (MalformedURLException e) {
 			log.error("잘못된 파일 경로입니다. " + uploadDir + e.getMessage());
-		} catch (FileStorageException e) {
+		} catch (FileSystemException e) {
 			log.error("존재하지 않는 파일입니다. fileId: " + fileId);
 		}
 

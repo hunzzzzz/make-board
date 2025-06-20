@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
-import com.example.board.common.exception.file.FileStorageException;
+import com.example.board.common.exception.file.FileSystemException;
 import com.example.board.common.exception.post.PostAccessException;
 import com.example.board.common.exception.post.PostNotFoundException;
 import com.example.board.common.exception.user.EmailDuplicateException;
@@ -18,7 +18,7 @@ public class GlobalExceptionHandler {
 	// 유효성 검사 실패
 	@ExceptionHandler(MethodArgumentNotValidException.class)
 	private ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
-		ErrorResponse error = ErrorResponse.of(null, e.getBindingResult());
+		ErrorResponse error = ErrorResponse.of(null, e.getBindingResult(), ErrorCode.VALIDATION_FAILED);
 
 		return ResponseEntity.badRequest().body(error);
 	}
@@ -26,7 +26,7 @@ public class GlobalExceptionHandler {
 	// 이메일 중복 시
 	@ExceptionHandler(EmailDuplicateException.class)
 	private ResponseEntity<ErrorResponse> handleEmailDuplicateException(EmailDuplicateException e) {
-		ErrorResponse error = ErrorResponse.of(e.getMessage());
+		ErrorResponse error = ErrorResponse.of(e.getMessage(), e.getErrorCode());
 
 		return ResponseEntity.badRequest().body(error);
 	}
@@ -34,7 +34,7 @@ public class GlobalExceptionHandler {
 	// 로그인 정보 불일치
 	@ExceptionHandler(LoginException.class)
 	private ResponseEntity<ErrorResponse> handleLoginException(LoginException e) {
-		ErrorResponse error = ErrorResponse.of(e.getMessage());
+		ErrorResponse error = ErrorResponse.of(e.getMessage(), e.getErrorCode());
 
 		return ResponseEntity.badRequest().body(error);
 	}
@@ -42,15 +42,15 @@ public class GlobalExceptionHandler {
 	// 파일 용량 초과
 	@ExceptionHandler(MaxUploadSizeExceededException.class)
 	ResponseEntity<ErrorResponse> handleMaxUploadSizeExceededException() {
-		ErrorResponse error = ErrorResponse.of("업로드 가능한 파일의 최대 크기는 10MB입니다.");
+		ErrorResponse error = ErrorResponse.of("업로드 가능한 파일의 최대 크기는 10MB입니다.", ErrorCode.EXCEEDED_MAX_FILE_SIZE);
 
 		return ResponseEntity.badRequest().body(error);
 	}
 	
 	// 파일 관련 에러
-	@ExceptionHandler(FileStorageException.class)
-	ResponseEntity<ErrorResponse> handleFileStorageException(FileStorageException e) {
-		ErrorResponse error = ErrorResponse.of(e.getMessage());
+	@ExceptionHandler(FileSystemException.class)
+	ResponseEntity<ErrorResponse> handleFileSystemException(FileSystemException e) {
+		ErrorResponse error = ErrorResponse.of(e.getMessage(), e.errorCode);
 	
 		return ResponseEntity.internalServerError().body(error);
 	}

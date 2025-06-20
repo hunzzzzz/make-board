@@ -21,7 +21,7 @@ import lombok.RequiredArgsConstructor;
 public class PostAddController {
 	private final PostAddService postAddService;
 
-	@PostMapping("/api/posts/add")
+	@PostMapping("/api/posts")
 	ResponseEntity<Object> add(
 			@UserPrincipal CurrentUser currentUser,
 			@Valid @ModelAttribute PostAddRequest request

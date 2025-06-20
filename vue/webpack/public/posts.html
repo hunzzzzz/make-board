@@ -226,7 +226,9 @@
           <option value="MOST_LIKED">추천순</option>
         </select>
 
-        <a href="#" class="action-button" @click.prevent="redirectToWrite">새 글 작성</a>
+        <a href="#" class="action-button" @click.prevent="redirectToWrite"
+          >새 글 작성</a
+        >
       </div>
 
       <table class="post-table">
@@ -300,13 +302,13 @@
     </div>
 
     <script type="module">
-      import Navbar from './components/Navbar.js';
+      import Navbar from "./components/Navbar.js";
 
       const { createApp, ref, onMounted, computed } = Vue;
 
       createApp({
         components: {
-          'navbar-component': Navbar
+          "navbar-component": Navbar,
         },
 
         setup() {
@@ -389,17 +391,16 @@
 
           // ***** [ 새 글 작성 버튼 클릭 시 인증 확인 ] *****
           const redirectToWrite = () => {
-            const accessToken = localStorage.getItem('accessToken');
+            const accessToken = localStorage.getItem("accessToken");
 
             if (accessToken) {
-              window.location.href = '/posts/add';
+              window.location.href = "/posts/add";
             } else {
-              alert('새로운 게시글을 작성하려면 로그인해야 합니다.');
+              alert("새로운 게시글을 작성하려면 로그인해야 합니다.");
 
-              window.location.href = '/login';
+              window.location.href = "/login";
             }
           };
-
 
           return {
             posts,

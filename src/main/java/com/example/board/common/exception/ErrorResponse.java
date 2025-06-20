@@ -14,22 +14,24 @@ import lombok.Setter;
 @Setter
 @Builder
 public class ErrorResponse {
-	private String message;
-	private Map<String, String> errors;
-	private String errorPageTitle;
-	private int errorPageStatusCode;
+	private final String message;
+	private final Map<String, String> errors;
+	private final String errorPageTitle;
+	private final int statusCode;
+	private final ErrorCode errorCode;
 
-	public static ErrorResponse of(String message) {
-		return ErrorResponse.builder().message(message).build();
+	public static ErrorResponse of(String message, ErrorCode errorCode) {
+		return ErrorResponse.builder().message(message).errorCode(errorCode).build();
 	}
 
-	public static ErrorResponse of(String message, BindingResult bindingResult) {
+	public static ErrorResponse of(String message, BindingResult bindingResult, ErrorCode errorCode) {
 		Map<String, String> errors = bindingResult.getFieldErrors().stream()
 				.collect(Collectors.toMap(FieldError::getField, FieldError::getDefaultMessage));
 
 		return ErrorResponse.builder()
 				.message(message)
 				.errors(errors)
+				.errorCode(errorCode)
 				.build();
 	}
 	
@@ -37,7 +39,7 @@ public class ErrorResponse {
 		return ErrorResponse.builder()
 				.message(message)
 				.errorPageTitle(errorPageTitle)
-				.errorPageStatusCode(errorPageStatusCode)
+				.statusCode(errorPageStatusCode)
 				.build();
 	}
 }

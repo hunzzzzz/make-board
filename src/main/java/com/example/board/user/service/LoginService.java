@@ -33,7 +33,7 @@ public class LoginService {
 		UserLoginResponse loginInfo = userMapper.getLoginInfo(request.getEmail());
 
 		if (loginInfo == null || !passwordEncoder.matches(request.getPassword(), loginInfo.getPassword()))
-			throw new LoginException("이메일 혹은 패스워드가 일치하지 않습니다.");
+			throw new LoginException();
 		
 		// 토큰 생성
 		return createTokens(loginInfo);

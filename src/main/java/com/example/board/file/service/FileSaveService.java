@@ -12,7 +12,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.example.board.common.component.FileHandler;
-import com.example.board.common.exception.file.FileStorageException;
+import com.example.board.common.exception.file.DirectoryCreationException;
+import com.example.board.common.exception.file.FileSystemException;
 import com.example.board.file.entity.File;
 import com.example.board.file.mapper.FileMapper;
 
@@ -37,7 +38,7 @@ public class FileSaveService {
 		} catch (IOException e) {
 			log.error("디렉터리 생성 실패: " + uploadDir + "\n" + e.getMessage());
 
-			throw new FileStorageException("디렉터리 생성 실패: " + uploadDir);
+			throw new DirectoryCreationException();
 		}
 	}
 
@@ -69,7 +70,7 @@ public class FileSaveService {
 		} catch (IOException e) {
 			log.error("파일 저장 실패: id:" + postId + "\n" + e.getMessage());
 
-			throw new FileStorageException("파일 저장 실패: " + multipartFile.getOriginalFilename());
+			throw new FileSystemException();
 		}
 
 	}

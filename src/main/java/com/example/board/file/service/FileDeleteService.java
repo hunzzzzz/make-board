@@ -10,7 +10,7 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.example.board.common.exception.file.FileStorageException;
+import com.example.board.common.exception.file.FileSystemException;
 import com.example.board.file.mapper.FileMapper;
 
 import lombok.extern.slf4j.Slf4j;
@@ -44,7 +44,7 @@ public class FileDeleteService {
 			} catch (IOException e) {
 				log.error("파일 삭제 실패: {}", savedFileName, e);
 
-				throw new FileStorageException("파일 삭제 실패: " + savedFileName);
+				throw new FileSystemException();
 			}
 		});
 	}

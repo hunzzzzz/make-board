@@ -2,6 +2,7 @@ package com.example.board.common.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod; // HttpMethod 임포트 추가
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -13,7 +14,7 @@ import com.example.board.common.auth.JwtAuthenticationFilter;
 
 import lombok.RequiredArgsConstructor;
 
-@RequiredArgsConstructor	
+@RequiredArgsConstructor
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
@@ -33,17 +34,13 @@ public class SecurityConfig {
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(authorize -> authorize
                 .requestMatchers(
-              		// 매핑 경로
                     "/",
                     "/signup",
                     "/login",
                     "/posts",
+                    "/posts/{postId}",
                     "/posts/add",
-                    // API 호출
-                    "/api/signup/**",
-                    "/api/login/**",
-                    "/api/posts",
-                    // 매핑 HTML 파일
+                    
                     "/signup.html",
                     "/login.html",
                     "/posts.html",
@@ -51,13 +48,18 @@ public class SecurityConfig {
                     "/post-form.html",
                     "/post-edit-form.html",
                     "/error-page.html",
-                    // 정적 리소스
+                    
                     "/css/**",
                     "/icons/**",
                     "/components/**",
                     "/favicon.ico",
                     "/.well-known/**"
                 ).permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/signup/**").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/login/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/posts").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/posts/{postId}").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/posts/{postId}/like/check").permitAll()
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
             )

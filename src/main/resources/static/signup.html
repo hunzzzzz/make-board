@@ -66,10 +66,10 @@
             <p v-if="errors.name" class="error-message">{{ errors.name }}</p>
           </div>
 
+          <!-- 회원가입 버튼 -->
           <button type="submit">회원가입</button>
         </form>
 
-        <!-- 로그인 버튼 -->
         <p class="link-text">
           이미 계정이 있으신가요?<a href="/login">로그인</a>
         </p>
@@ -156,25 +156,29 @@
                 didEmailCheck.value = true;
                 serverMessage.value = "사용 가능한 이메일입니다.";
                 serverMessageType.value = "success";
+              } else if (
+                response.status === 400 &&
+                result.errorCode === "VALIDATION_FAILED"
+              ) {
+                errors.value = result.errors;
+                serverMessage.value = "입력값을 다시 확인해주세요.";
+                serverMessageType.value = "error";
+              } else if (
+                response.status === 400 &&
+                result.errorCode === "DUPLICATED_EMAIL"
+              ) {
+                errors.value.email = "이메일을 다시 입력해주세요.";
+                serverMessage.value = result.message;
+                serverMessageType.value = "error";
               } else {
-                didEmailCheck.value = false;
-                if (response.status === 400 && result.errors) {
-                  errors.value = result.errors;
-                  serverMessage.value = "입력값을 다시 확인해주세요.";
-                  serverMessageType.value = "error";
-                } else {
-                  serverMessage.value =
-                    result.message ||
-                    "이메일 중복 확인 중 오류가 발생했습니다.";
-                  serverMessageType.value = "error";
-                }
+                serverMessage.value =
+                  result.message || "이메일 중복 확인 중 오류가 발생했습니다.";
+                serverMessageType.value = "error";
               }
             } catch (error) {
-              console.error("이메일 중복 확인 중 네트워크 오류:", error);
               serverMessage.value =
                 "네트워크 오류 또는 서버 응답 처리 중 문제가 발생했습니다.";
               serverMessageType.value = "error";
-              didEmailCheck.value = false;
             }
           };
 
@@ -219,19 +223,19 @@
                 setTimeout(() => {
                   window.location.href = "/login";
                 }, 1500);
+              } else if (
+                response.status === 400 &&
+                result.errorCode === "VALIDATION_FAILED"
+              ) {
+                errors.value = result.errors;
+                serverMessage.value = "입력값을 다시 확인해주세요.";
+                serverMessageType.value = "error";
               } else {
-                if (response.status === 400 && result.errors) {
-                  errors.value = result.errors;
-                  serverMessage.value = "입력값을 다시 확인해주세요.";
-                  serverMessageType.value = "error";
-                } else {
-                  serverMessage.value =
-                    result.message || "회원가입 중 오류가 발생했습니다.";
-                  serverMessageType.value = "error";
-                }
+                serverMessage.value =
+                  "이메일 중복 확인 중 오류가 발생했습니다.";
+                serverMessageType.value = "error";
               }
             } catch (error) {
-              console.error("회원가입 중 네트워크 오류:", error);
               serverMessage.value =
                 "네트워크 오류 또는 서버 응답 처리 중 문제가 발생했습니다.";
               serverMessageType.value = "error";
