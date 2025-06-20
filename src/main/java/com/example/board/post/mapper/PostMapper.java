@@ -1,6 +1,7 @@
 package com.example.board.post.mapper;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.apache.ibatis.annotations.Mapper;
 
@@ -41,6 +42,7 @@ public interface PostMapper {
 	 * 게시글 삭제에 필요한 메서드
 	 */
 	void delete(long postId, String deletedPostTitle);
+	UUID getAuthorId(long postId);
 	
 	/*
 	 * 게시글 좋아요에 필요한 메서드

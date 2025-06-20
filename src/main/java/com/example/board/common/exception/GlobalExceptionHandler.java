@@ -58,7 +58,7 @@ public class GlobalExceptionHandler {
 	// 삭제된 게시글에 접근 시
 	@ExceptionHandler(PostAccessException.class)
 	ResponseEntity<ErrorResponse> handlePostAccessException(PostAccessException e) {
-		ErrorResponse error = ErrorResponse.of(e.message, "접근 권한이 없습니다", e.statusCode);
+		ErrorResponse error = ErrorResponse.of(e.getMessage(), "접근 권한이 없습니다", e.getStatusCode(), e.getErrorCode());
 		
 		return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
 	}
@@ -66,7 +66,7 @@ public class GlobalExceptionHandler {
 	// 존재하지 않는 게시글에 접근 시
 	@ExceptionHandler(PostNotFoundException.class)
 	ResponseEntity<ErrorResponse> handlePostNotFoundException(PostNotFoundException e) {
-		ErrorResponse error = ErrorResponse.of(e.message, "페이지를 찾을 수 없습니다", e.statusCode);
+		ErrorResponse error = ErrorResponse.of(e.getMessage(), "페이지를 찾을 수 없습니다", e.getStatusCode(), e.getErrorCode());
 		
 		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
 	}

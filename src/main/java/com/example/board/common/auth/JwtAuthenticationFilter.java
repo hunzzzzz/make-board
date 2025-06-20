@@ -93,6 +93,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 		// Authorization 헤더 검증
 		String authorizationHeaderValue = request.getHeader(HttpHeaders.AUTHORIZATION);
+		
+		System.out.println(authorizationHeaderValue);
 
 		if (authorizationHeaderValue == null || !authorizationHeaderValue.startsWith("Bearer ")) {
 			sendErrorResponse(response, HttpStatus.UNAUTHORIZED, "Authorization 헤더에 토큰 정보가 포함되어 있지 않습니다.",

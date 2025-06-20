@@ -165,6 +165,12 @@
 		WHERE id=#{postId} 
 	</update>
 	
+	<select id="getAuthorId">
+		SELECT user_id
+		FROM t_board_post
+		WHERE id=#{postId}
+	</select>
+	
 	<!-- 좋아요 -->
 	<update id="incrementLikeCount">
 		UPDATE t_board_post

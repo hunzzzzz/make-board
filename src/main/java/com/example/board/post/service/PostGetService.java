@@ -4,26 +4,27 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.board.common.component.TimeFormatter;
+import com.example.board.common.exception.ErrorCode;
 import com.example.board.common.exception.post.PostAccessException;
 import com.example.board.common.exception.post.PostNotFoundException;
 import com.example.board.post.dto.response.PostDetailResponse;
 import com.example.board.post.entity.PostStatus;
 import com.example.board.post.mapper.PostMapper;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Service
 public class PostGetService {
-	private PostMapper postMapper;
-	private TimeFormatter timeFormatter;
+	private final PostMapper postMapper;
+	private final TimeFormatter timeFormatter;
 
 	private void validate(PostDetailResponse post) {
 		if (post == null)
-			throw new PostNotFoundException("존재하지 않는 게시글입니다.");
+			throw new PostNotFoundException("존재하지 않는 게시글입니다.", ErrorCode.POST_NOT_FOUND);
 
 		if (post.getStatus().equals(PostStatus.DELETED))
-			throw new PostAccessException("접근이 불가능합니다.");
+			throw new PostAccessException("접근이 불가능합니다.", ErrorCode.CANNOT_READ_DELETED_POST);
 	}
 
 	private void formatDateTime(PostDetailResponse post) {
@@ -50,5 +51,5 @@ public class PostGetService {
 
 		return post;
 	}
-	
+
 }

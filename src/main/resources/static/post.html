@@ -277,6 +277,8 @@
   </head>
   <body>
     <div id="app" class="post-container">
+      <navbar-component></navbar-component>
+
       <template v-if="post">
         <div class="post-title-area">
           <h1 class="post-title">{{ post.title }}</h1>
@@ -356,15 +358,22 @@
 
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script type="module">
-      import Navbar from "/components/Navbar.js"; // 경로 확인
+      import Navbar from "/components/Navbar.js";
+
       const { createApp, ref, onMounted } = Vue;
 
       createApp({
+        components: {
+          "navbar-component": Navbar,
+        },
+
         setup() {
           // ***** [ 변수 세팅 ] *****
           const post = ref(null);
           const postId = window.location.pathname.split("/").pop(); // URI에서 postId 추출
           const hasLike = ref(false);
+
+          const accessToken = localStorage.getItem("accessToken");
 
           // ***** [ 게시글 불러오기 ] *****
           const fetchPost = async () => {
@@ -486,21 +495,32 @@
 
             try {
               const response = await fetch(`/api/posts/${postId}/like`, {
+                headers: {
+                  Authorization: accessToken,
+                },
                 method: method,
               });
 
               if (response.ok) {
                 hasLike.value = !hasLike.value;
                 await fetchPost();
-              } else {
-                const errorData = await response.json();
+              } else if (
+                response.status === 401 &&
+                result.errorCode === "EXPIRED_ATK"
+              ) {
+                const error = await response.json();
 
-                alert("좋아요 처리 중 오류가 발생했습니다.");
-                console.error("좋아요 처리 중 오류 발생:", errorData);
+                alert("인증이 만료되었습니다. 다시 로그인해주세요.");
+                localStorage.removeItem("accessToken");
+
+                window.location.href = "/login";
+              } else {
+                alert("페이지 새로고침 후 다시 시도해주세요.");
               }
             } catch (error) {
-              alert("네트워크 오류로 좋아요 처리에 실패했습니다.");
-              console.error("좋아요 처리 중 네트워크 에러 발생:", error);
+              alert(
+                "네트워크 오류 또는 서버 응답 처리 중 문제가 발생했습니다."
+              );
             }
           };
 
@@ -511,27 +531,44 @@
 
           // ***** [ 삭제 버튼을 클릭한 경우 ] *****
           const deletePost = async () => {
+            if (!accessToken) {
+              alert("게시글을 삭제하려면 로그인해야 합니다.");
+              return;
+            }
+
             if (confirm("정말로 이 게시글을 삭제하시겠습니까?")) {
               try {
                 const response = await fetch(`/api/posts/${postId}`, {
+                  headers: {
+                    Authorization: accessToken,
+                  },
                   method: "DELETE",
                 });
+                const result = await response.json();
 
                 if (response.ok) {
                   alert("게시글이 삭제되었습니다.");
                   window.location.href = "/posts";
+                } else if (
+                  response.status === 401 &&
+                  result.errorCode === "EXPIRED_ATK"
+                ) {
+                  alert("인증이 만료되었습니다. 다시 로그인해주세요.");
+                  localStorage.removeItem("accessToken");
+
+                  window.location.href = "/login";
+                } else if (
+                  response.status === 403 &&
+                  result.errorCode === "CANNOT_DELETE_OTHERS_POST"
+                ) {
+                  alert("다른 유저의 게시글을 삭제할 수 없습니다.");
                 } else {
-                  const errorData = await response.json();
-                  alert(
-                    `게시글 삭제 중 오류가 발생했습니다: ${
-                      errorData.message || response.statusText
-                    }`
-                  );
-                  console.error("게시글 삭제 중 오류 발생:", errorData);
+                  alert("페이지 새로고침 후 다시 시도해주세요.");
                 }
               } catch (error) {
-                console.error("게시글 삭제 중 네트워크 에러 발생:", error);
-                alert("게시글 삭제 중 에러가 발생했습니다.");
+                alert(
+                  "네트워크 오류 또는 서버 응답 처리 중 문제가 발생했습니다."
+                );
               }
             }
           };

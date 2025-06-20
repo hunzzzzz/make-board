@@ -302,7 +302,7 @@
     </div>
 
     <script type="module">
-      import Navbar from "./components/Navbar.js";
+      import Navbar from "/components/Navbar.js";
 
       const { createApp, ref, onMounted, computed } = Vue;
 
@@ -386,15 +386,7 @@
 
           // ***** [ 게시글 조회를 클릭한 경우 ] *****
           const goToPostDetail = (postId) => {
-            const accessToken = localStorage.getItem("accessToken");
-
-            if (accessToken) {
-              window.location.href = `/posts/${postId}`;
-            } else {
-              alert("게시글을 조회하려면 로그인해야 합니다.");
-
-              window.location.href = "/login";
-            }
+            window.location.href = `/posts/${postId}`;
           };
 
           // ***** [ 새 글 작성 버튼 클릭 시 인증 확인 ] *****

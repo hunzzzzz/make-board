@@ -35,11 +35,12 @@ public class ErrorResponse {
 				.build();
 	}
 	
-	public static ErrorResponse of(String message, String errorPageTitle, int errorPageStatusCode) {
+	public static ErrorResponse of(String message, String errorPageTitle, int errorPageStatusCode, ErrorCode errorCode) {
 		return ErrorResponse.builder()
 				.message(message)
 				.errorPageTitle(errorPageTitle)
 				.statusCode(errorPageStatusCode)
+				.errorCode(errorCode)
 				.build();
 	}
 }
