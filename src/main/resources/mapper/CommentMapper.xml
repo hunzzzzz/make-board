@@ -20,10 +20,10 @@
 		SELECT * FROM (
 			SELECT a.*, ROWNUM as rn FROM
 				(
-				SELECT id, user_id, author, content, created_at
-				FROM t_board_comment
-				WHERE post_id = #{postId} AND id > #{cursor}
-				ORDER BY id ASC
+					SELECT id, user_id, author, content, created_at
+					FROM t_board_comment
+					WHERE post_id = #{postId} AND id > #{cursor}
+					ORDER BY id ASC
 				) a
 			WHERE ROWNUM &lt;= #{pageSize}		
 		)

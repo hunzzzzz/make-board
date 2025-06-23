@@ -18,4 +18,6 @@ public class CommentResponse {
 	private String content;
 	
 	private LocalDateTime createdAt;
+	
+	private String formattedCreatedAt;
 }
